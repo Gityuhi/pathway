@@ -1,45 +1,13 @@
-# 既定ファイル名用のエイリアス。トリガでは cloudbuild.backend.yaml / cloudbuild.frontend.yaml を推奨。
-# 中身は cloudbuild.backend.yaml と同一（API の CD）。
-substitutions:
-  _REGION: asia-northeast2
-  _AR_REPOSITORY: pathway-go
-  _API_IMAGE: app
-  _CLOUD_RUN_API_SERVICE: pathway-service
-
-options:
-  logging: CLOUD_LOGGING_ONLY
-
-timeout: 900s
-
 steps:
-  - id: docker-build-api
-    name: gcr.io/cloud-builders/docker
-    args:
-      - build
-      - --target=production
-      - -f
-      - backend/Dockerfile
-      - -t
-      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_API_IMAGE}:$SHORT_SHA
-      - .
+  # Dockerビルドを実行するステップ
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-t', 'asia-northeast2-docker.pkg.dev/pathway-492603/pathway-go/app:v1',
+      '-f', 'backend/Dockerfile', # ここでDockerfileの場所を指定！
+      '.' # ビルドコンテキスト（ルートを指定）
+    ]
 
-  - id: docker-push-api
-    name: gcr.io/cloud-builders/docker
-    args:
-      - push
-      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_API_IMAGE}:$SHORT_SHA
-    waitFor:
-      - docker-build-api
-
-  - id: run-deploy-api
-    name: gcr.io/google.com/cloudsdks/gcloud
-    args:
-      - run
-      - deploy
-      - ${_CLOUD_RUN_API_SERVICE}
-      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_API_IMAGE}:$SHORT_SHA
-      - --region=${_REGION}
-      - --platform=managed
-      - --quiet
-    waitFor:
-      - docker-push-api
+# 作成したイメージを Artifact Registry に保存する
+images:
+  - 'asia-northeast2-docker.pkg.dev/pathway-492603/pathway-go/app:v1'
