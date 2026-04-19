@@ -1,5 +1,5 @@
-# 既定ファイル名用のエイリアス。トリガでは cloudbuild.backend.yaml / cloudbuild.frontend.yaml を推奨。
-# 中身は cloudbuild.backend.yaml と同一（API の CD）。
+# Backend: Dockerfile ビルド → Artifact Registry → Cloud Run（API）
+# トリガ例: ブランチ ^main$、パス backend/**
 substitutions:
   _REGION: asia-northeast2
   _AR_REPOSITORY: pathway-go

@@ -49,9 +49,11 @@ flowchart TB
 
 **ゴール**: コードを push（または main マージ）したら **ビルド → Artifact Registry → Cloud Run** までが **再現可能に自動**で回る。
 
-- `cloudbuild.yaml`（API / Web で 1 本または分割）。
-- Cloud Build トリガ（例: `backend/**` / `frontend/**` のパスフィルタ）。
-- Cloud Run へのデプロイに必要な **サービスアカウント・権限**の整理。
+- **設定ファイル**: [cloudbuild.backend.yaml](cloudbuild.backend.yaml)（API: `backend/Dockerfile` → AR → Cloud Run）、[cloudbuild.frontend.yaml](cloudbuild.frontend.yaml)（Web: `frontend/` を `--source` ビルド → Cloud Run）。ルートの [cloudbuild.yaml](cloudbuild.yaml) は API 用のエイリアス（手動 `gcloud builds submit` 用）。
+- **Cloud Build トリガ（GCP コンソールで作成）**
+  - リポジトリ接続後、**トリガ 2 本**を推奨: ブランチ `^main$`、**含めるパス**は API 用 `backend/**`、Web 用 `frontend/**`。それぞれの「設定ファイルの場所」に上記 YAML を指定。
+  - **置換変数**: 実際の Cloud Run サービス名・リポジトリ名が異なる場合、トリガの「置換変数」で `_CLOUD_RUN_API_SERVICE` / `_CLOUD_RUN_WEB_SERVICE` / `_AR_REPOSITORY` / `_API_IMAGE` / `_REGION` を上書きする。
+- **Cloud Build 既定 SA**（`...@cloudbuild.gserviceaccount.com`）に、少なくとも **Artifact Registry 書き込み**、**Cloud Run 管理者**、必要に応じて **Cloud Run ランタイム SA への `roles/iam.serviceAccountUser`** を付与。フロントの `--source` ビルドでは **Cloud Storage**（ソース tarball）や **追加の Cloud Build API** 権限が必要になることがあるため、失敗ログに応じてロールを足す。
 - **CI（PR での go test / Lint）はまだ必須にしない**（時間をかけすぎない方針）。
 
 ---
