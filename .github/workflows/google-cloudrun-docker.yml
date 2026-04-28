@@ -7,8 +7,8 @@ on:
 
 env:
   PROJECT_ID: 'pathway-492603' 
-  REGION: 'asia-northeast2' # TODO: update to your region
-  SERVICE: 'pathway-service' # TODO: update to your service name
+  REGION: 'asia-northeast2'
+  SERVICE: 'pathway-service'
   WORKLOAD_IDENTITY_PROVIDER: 'projects/950237003011/locations/global/workloadIdentityPools/pathway-go/providers/pathway-go'
   SERVICE_ACCOUNT: '950237003011-compute@developer.gserviceaccount.com'
   REPOSITORY: 'pathway-go'
