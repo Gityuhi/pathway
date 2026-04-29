@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - 'main'
+    paths:
+      - 'backend/**'
+      - '.github/workflows/google-cloudrun-docker.yml'
 
 env:
   PROJECT_ID: 'pathway-492603' 
@@ -52,7 +55,7 @@ jobs:
       - name: 'Build and Push Container'
         run: |-
           DOCKER_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
-          docker build -f backend/Dockerfile -t "${DOCKER_TAG}" .
+          docker build --target production -f backend/Dockerfile -t "${DOCKER_TAG}" .
           docker push "${DOCKER_TAG}"
           echo "DOCKER_TAG=${DOCKER_TAG}" >> $GITHUB_ENV
 
