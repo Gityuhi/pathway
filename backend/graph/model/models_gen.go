@@ -2,6 +2,10 @@
 
 package model
 
+type EditStatusTodo struct {
+	Status string `json:"status"`
+}
+
 type Mutation struct {
 }
 
@@ -14,10 +18,14 @@ type Query struct {
 }
 
 type Todo struct {
-	ID   string `json:"id"`
+	ID     string `json:"id"`
+	Text   string `json:"text"`
+	Status string `json:"status"`
+	User   *User  `json:"user"`
+}
+
+type UpdateTodo struct {
 	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
 }
 
 type User struct {
