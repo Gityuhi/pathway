@@ -2,6 +2,17 @@
 
 package model
 
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"strconv"
+)
+
+type EditStatusTodo struct {
+	Status TodoStatus `json:"status"`
+}
+
 type Mutation struct {
 }
 
@@ -14,13 +25,74 @@ type Query struct {
 }
 
 type Todo struct {
-	ID   string `json:"id"`
+	ID     string     `json:"id"`
+	Text   string     `json:"text"`
+	Status TodoStatus `json:"status"`
+	User   *User      `json:"user"`
+}
+
+type UpdateTodo struct {
 	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
 }
 
 type User struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+type TodoStatus string
+
+const (
+	TodoStatusNotStarted TodoStatus = "NOT_STARTED"
+	TodoStatusInProgress TodoStatus = "IN_PROGRESS"
+	TodoStatusCompleted  TodoStatus = "COMPLETED"
+)
+
+var AllTodoStatus = []TodoStatus{
+	TodoStatusNotStarted,
+	TodoStatusInProgress,
+	TodoStatusCompleted,
+}
+
+func (e TodoStatus) IsValid() bool {
+	switch e {
+	case TodoStatusNotStarted, TodoStatusInProgress, TodoStatusCompleted:
+		return true
+	}
+	return false
+}
+
+func (e TodoStatus) String() string {
+	return string(e)
+}
+
+func (e *TodoStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TodoStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TodoStatus", str)
+	}
+	return nil
+}
+
+func (e TodoStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *TodoStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e TodoStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }

@@ -16,6 +16,21 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
 }
 
+// DeleteTodo is the resolver for the deleteTodo field.
+func (r *mutationResolver) DeleteTodo(ctx context.Context, id string) (*model.Todo, error) {
+	panic(fmt.Errorf("not implemented: DeleteTodo - deleteTodo"))
+}
+
+// UpdateTodo is the resolver for the updateTodo field.
+func (r *mutationResolver) UpdateTodo(ctx context.Context, id string, input model.UpdateTodo) (*model.Todo, error) {
+	panic(fmt.Errorf("not implemented: UpdateTodo - updateTodo"))
+}
+
+// EditStatusTodo is the resolver for the editStatusTodo field.
+func (r *mutationResolver) EditStatusTodo(ctx context.Context, id string, input model.EditStatusTodo) (*model.Todo, error) {
+	panic(fmt.Errorf("not implemented: EditStatusTodo - editStatusTodo"))
+}
+
 // Todos is the resolver for the todos field.
 func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 	panic(fmt.Errorf("not implemented: Todos - todos"))
