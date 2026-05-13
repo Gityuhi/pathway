@@ -5,7 +5,7 @@
 type Todo {
   id: ID!
   text: String!
-  done: Boolean!
+  status: String!
   user: User!
 }
 
@@ -23,6 +23,17 @@ input NewTodo {
   userId: String!
 }
 
+input UpdateTodo {
+  text: String!
+}
+
+input EditStatusTodo {
+  status: String!
+}
+
 type Mutation {
   createTodo(input: NewTodo!): Todo!
+  deleteTodo(id: ID!): Todo!
+  updateTodo(id: ID!, input: UpdateTodo!): Todo!
+  editStatusTodo(id: ID!, input: editStatusTodo!): Todo!
 }
