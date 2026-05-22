@@ -7,6 +7,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createTodo = `-- name: CreateTodo :one
@@ -36,12 +38,17 @@ func (q *Queries) CreateTodo(ctx context.Context, arg CreateTodoParams) (Todo, e
 
 const deleteTodo = `-- name: DeleteTodo :one
 delete from todos
-where user_id = $1
+where id = $1 and user_id = $2
 returning id, text, status, user_id, created_at, updated_at
 `
 
-func (q *Queries) DeleteTodo(ctx context.Context, userID string) (Todo, error) {
-	row := q.db.QueryRow(ctx, deleteTodo, userID)
+type DeleteTodoParams struct {
+	ID     pgtype.UUID
+	UserID string
+}
+
+func (q *Queries) DeleteTodo(ctx context.Context, arg DeleteTodoParams) (Todo, error) {
+	row := q.db.QueryRow(ctx, deleteTodo, arg.ID, arg.UserID)
 	var i Todo
 	err := row.Scan(
 		&i.ID,
@@ -57,17 +64,18 @@ func (q *Queries) DeleteTodo(ctx context.Context, userID string) (Todo, error) {
 const editStatusTodo = `-- name: EditStatusTodo :one
 update todos
 set status = $1
-where user_id = $2
+where id = $2 and user_id = $3
 returning id, text, status, user_id, created_at, updated_at
 `
 
 type EditStatusTodoParams struct {
 	Status TodoStatus
+	ID     pgtype.UUID
 	UserID string
 }
 
 func (q *Queries) EditStatusTodo(ctx context.Context, arg EditStatusTodoParams) (Todo, error) {
-	row := q.db.QueryRow(ctx, editStatusTodo, arg.Status, arg.UserID)
+	row := q.db.QueryRow(ctx, editStatusTodo, arg.Status, arg.ID, arg.UserID)
 	var i Todo
 	err := row.Scan(
 		&i.ID,
@@ -115,17 +123,18 @@ func (q *Queries) GetTodos(ctx context.Context, userID string) ([]Todo, error) {
 const updateTodo = `-- name: UpdateTodo :one
 update todos
 set text = $1
-where user_id = $2
+where id = $2 and user_id = $3
 returning id, text, status, user_id, created_at, updated_at
 `
 
 type UpdateTodoParams struct {
 	Text   string
+	ID     pgtype.UUID
 	UserID string
 }
 
 func (q *Queries) UpdateTodo(ctx context.Context, arg UpdateTodoParams) (Todo, error) {
-	row := q.db.QueryRow(ctx, updateTodo, arg.Text, arg.UserID)
+	row := q.db.QueryRow(ctx, updateTodo, arg.Text, arg.ID, arg.UserID)
 	var i Todo
 	err := row.Scan(
 		&i.ID,

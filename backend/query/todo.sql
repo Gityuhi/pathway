@@ -10,16 +10,16 @@ returning *;
 -- name: UpdateTodo :one
 update todos
 set text = $1
-where user_id = $2
+where id = $2 and user_id = $3
 returning *;
 
 -- name: DeleteTodo :one
 delete from todos
-where user_id = $1
+where id = $1 and user_id = $2
 returning *;
 
 -- name: EditStatusTodo :one
 update todos
 set status = $1
-where user_id = $2
+where id = $2 and user_id = $3
 returning *;
