@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"pathway-backend/graph"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -32,12 +33,21 @@ func main() {
 	}
 	config.MaxConns = 10
 
-	pool, err := pgxpool.NewWithConfig(context.Background(), config)
+	ctx := context.Background()
+
+	pool, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
-		log.Fatal("cannot connect to db:", err)
+		log.Fatal("cannot create db pool:", err)
+	}
+	defer pool.Close()
+
+	pingCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	if err := pool.Ping(pingCtx); err != nil {
+		log.Fatal("cannot ping db:", err)
 	}
 	log.Println("Connected to db")
-	defer pool.Close()
 
 	port := os.Getenv("API_PORT")
 	if port == "" {
