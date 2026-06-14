@@ -1,5 +1,5 @@
 -- 1. todosテーブルのuser_idの外部キー制約を一旦削除
-AlTER TABLE todos DROP CONSTRAINT todos_user_id_fkey;
+ALTER TABLE todos DROP CONSTRAINT IF EXISTS todos_user_id_fkey;
 
 -- 2. usersテーブルのidをUUIDに変換
 AlTER TABLE users ALTER COLUMN id TYPE UUID USING id::uuid;
