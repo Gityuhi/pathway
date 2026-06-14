@@ -58,13 +58,13 @@ type Todo struct {
 	ID        pgtype.UUID
 	Text      string
 	Status    TodoStatus
-	UserID    string
+	UserID    pgtype.UUID
 	CreatedAt pgtype.Timestamptz
 	UpdatedAt pgtype.Timestamptz
 }
 
 type User struct {
-	ID        string
+	ID        pgtype.UUID
 	Name      string
 	CreatedAt pgtype.Timestamptz
 	UpdatedAt pgtype.Timestamptz

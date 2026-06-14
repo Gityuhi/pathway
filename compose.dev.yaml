@@ -9,3 +9,4 @@ services:
       - ./backend:/app
     environment:
       - DB_SOURCE=${DB_SOURCE}
+      - DEV_USER_ID=${DEV_USER_ID}

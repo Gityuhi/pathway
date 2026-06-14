@@ -19,7 +19,7 @@ returning id, text, status, user_id, created_at, updated_at
 
 type CreateTodoParams struct {
 	Text   string
-	UserID string
+	UserID pgtype.UUID
 }
 
 func (q *Queries) CreateTodo(ctx context.Context, arg CreateTodoParams) (Todo, error) {
@@ -44,7 +44,7 @@ returning id, text, status, user_id, created_at, updated_at
 
 type DeleteTodoParams struct {
 	ID     pgtype.UUID
-	UserID string
+	UserID pgtype.UUID
 }
 
 func (q *Queries) DeleteTodo(ctx context.Context, arg DeleteTodoParams) (Todo, error) {
@@ -71,7 +71,7 @@ returning id, text, status, user_id, created_at, updated_at
 type EditStatusTodoParams struct {
 	Status TodoStatus
 	ID     pgtype.UUID
-	UserID string
+	UserID pgtype.UUID
 }
 
 func (q *Queries) EditStatusTodo(ctx context.Context, arg EditStatusTodoParams) (Todo, error) {
@@ -93,7 +93,7 @@ select id, text, status, user_id, created_at, updated_at from todos
 where user_id = $1
 `
 
-func (q *Queries) GetTodos(ctx context.Context, userID string) ([]Todo, error) {
+func (q *Queries) GetTodos(ctx context.Context, userID pgtype.UUID) ([]Todo, error) {
 	rows, err := q.db.Query(ctx, getTodos, userID)
 	if err != nil {
 		return nil, err
@@ -130,7 +130,7 @@ returning id, text, status, user_id, created_at, updated_at
 type UpdateTodoParams struct {
 	Text   string
 	ID     pgtype.UUID
-	UserID string
+	UserID pgtype.UUID
 }
 
 func (q *Queries) UpdateTodo(ctx context.Context, arg UpdateTodoParams) (Todo, error) {

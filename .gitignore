@@ -21,3 +21,6 @@
 # --- Infrastructure / Tooling ---
 .terraform/
 *.tfstate*
+
+# --- Supabase ---
+supabase/snippets/
