@@ -12,7 +12,3 @@ AlTER TABLE todos ALTER COLUMN status SET DEFAULT 'NOT_STARTED';
 
 -- 5. 外部キー制約を再追加
 AlTER TABLE todos ADD CONSTRAINT todos_user_id_fkey FOREIGN KEY (user_id) REFERENCES users (id);
-
--- 6. Playground用のテストユーザーを追加
-INSERT INTO users (id, name) VALUES ('00000000-0000-0000-0000-000000000001', 'Playground User')
-ON CONFLICT (id) DO NOTHING;
