@@ -5,7 +5,6 @@ package graph
 import (
 	"bytes"
 	"context"
-	"embed"
 	"errors"
 	"fmt"
 	"math"
@@ -260,19 +259,53 @@ func newExecutionContext(
 	}
 }
 
-//go:embed "schema.graphqls"
-var sourcesFS embed.FS
+var sources = []*ast.Source{
+	{Name: "../schema.graphqls", Input: `# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
 
-func sourceData(filename string) string {
-	data, err := sourcesFS.ReadFile(filename)
-	if err != nil {
-		panic(fmt.Sprintf("codegen problem: %s not available", filename))
-	}
-	return string(data)
+type Todo {
+  id: ID!
+  text: String!
+  status: TodoStatus!
+  user: User!
 }
 
-var sources = []*ast.Source{
-	{Name: "schema.graphqls", Input: sourceData("schema.graphqls"), BuiltIn: false},
+enum TodoStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+type User {
+  id: ID!
+  name: String!
+}
+
+type Query {
+  todos: [Todo!]!
+}
+
+input NewTodo {
+  text: String!
+  userId: ID!
+}
+
+input UpdateTodo {
+  text: String!
+}
+
+input EditStatusTodo {
+  status: TodoStatus!
+}
+
+type Mutation {
+  createTodo(input: NewTodo!): Todo!
+  deleteTodo(id: ID!): Todo!
+  updateTodo(id: ID!, input: UpdateTodo!): Todo!
+  editStatusTodo(id: ID!, input: EditStatusTodo!): Todo!
+}
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
