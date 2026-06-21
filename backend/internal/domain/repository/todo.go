@@ -10,5 +10,5 @@ type TodoRepository interface {
 	CreateTodo(ctx context.Context, userID, text string) (entity.Todo, error)
 	UpdateTodo(ctx context.Context, userID, id string, text string) (entity.Todo, error)
 	DeleteTodo(ctx context.Context, userID, id string) (entity.Todo, error)
-	EditStatusTodo(ctx context.Context, userID, id string, status entity.TodoStatus) (entity.Todo, error)
+	UpdateTodoStatus(ctx context.Context, userID, id string, status entity.TodoStatus) (entity.Todo, error)
 }

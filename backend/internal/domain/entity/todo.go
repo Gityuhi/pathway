@@ -21,5 +21,5 @@ type Todo struct {
 	ID string
 	Text string
 	Status TodoStatus
-	User User
+	UserID string
 }

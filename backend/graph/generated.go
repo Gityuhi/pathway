@@ -37,10 +37,10 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
-		CreateTodo     func(childComplexity int, input model.NewTodo) int
-		DeleteTodo     func(childComplexity int, id string) int
-		EditStatusTodo func(childComplexity int, id string, input model.EditStatusTodo) int
-		UpdateTodo     func(childComplexity int, id string, input model.UpdateTodo) int
+		CreateTodo       func(childComplexity int, input model.NewTodo) int
+		DeleteTodo       func(childComplexity int, id string) int
+		UpdateTodo       func(childComplexity int, id string, input model.UpdateTodo) int
+		UpdateTodoStatus func(childComplexity int, id string, input model.UpdateTodoStatus) int
 	}
 
 	Query struct {
@@ -64,7 +64,7 @@ type MutationResolver interface {
 	CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error)
 	DeleteTodo(ctx context.Context, id string) (*model.Todo, error)
 	UpdateTodo(ctx context.Context, id string, input model.UpdateTodo) (*model.Todo, error)
-	EditStatusTodo(ctx context.Context, id string, input model.EditStatusTodo) (*model.Todo, error)
+	UpdateTodoStatus(ctx context.Context, id string, input model.UpdateTodoStatus) (*model.Todo, error)
 }
 type QueryResolver interface {
 	Todos(ctx context.Context) ([]*model.Todo, error)
@@ -106,17 +106,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.DeleteTodo(childComplexity, args["id"].(string)), true
-	case "Mutation.editStatusTodo":
-		if e.ComplexityRoot.Mutation.EditStatusTodo == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_editStatusTodo_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Mutation.EditStatusTodo(childComplexity, args["id"].(string), args["input"].(model.EditStatusTodo)), true
 	case "Mutation.updateTodo":
 		if e.ComplexityRoot.Mutation.UpdateTodo == nil {
 			break
@@ -128,6 +117,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.UpdateTodo(childComplexity, args["id"].(string), args["input"].(model.UpdateTodo)), true
+	case "Mutation.updateTodoStatus":
+		if e.ComplexityRoot.Mutation.UpdateTodoStatus == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateTodoStatus_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.UpdateTodoStatus(childComplexity, args["id"].(string), args["input"].(model.UpdateTodoStatus)), true
 
 	case "Query.todos":
 		if e.ComplexityRoot.Query.Todos == nil {
@@ -182,9 +182,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputEditStatusTodo,
 		ec.unmarshalInputNewTodo,
 		ec.unmarshalInputUpdateTodo,
+		ec.unmarshalInputUpdateTodoStatus,
 	)
 	first := true
 
@@ -295,7 +295,7 @@ input UpdateTodo {
   text: String!
 }
 
-input EditStatusTodo {
+input UpdateTodoStatus {
   status: TodoStatus!
 }
 
@@ -303,7 +303,7 @@ type Mutation {
   createTodo(input: NewTodo!): Todo!
   deleteTodo(id: ID!): Todo!
   updateTodo(id: ID!, input: UpdateTodo!): Todo!
-  editStatusTodo(id: ID!, input: EditStatusTodo!): Todo!
+  updateTodoStatus(id: ID!, input: UpdateTodoStatus!): Todo!
 }
 `, BuiltIn: false},
 }
@@ -481,7 +481,7 @@ func (ec *executionContext) field_Mutation_deleteTodo_args(ctx context.Context, 
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_editStatusTodo_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Mutation_updateTodoStatus_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
@@ -493,8 +493,8 @@ func (ec *executionContext) field_Mutation_editStatusTodo_args(ctx context.Conte
 	}
 	args["id"] = arg0
 	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input",
-		func(ctx context.Context, v any) (model.EditStatusTodo, error) {
-			return ec.unmarshalNEditStatusTodo2pathwayᚑbackendᚋgraphᚋmodelᚐEditStatusTodo(ctx, v)
+		func(ctx context.Context, v any) (model.UpdateTodoStatus, error) {
+			return ec.unmarshalNUpdateTodoStatus2pathwayᚑbackendᚋgraphᚋmodelᚐUpdateTodoStatus(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -735,17 +735,17 @@ func (ec *executionContext) fieldContext_Mutation_updateTodo(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_editStatusTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_updateTodoStatus(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Mutation_editStatusTodo(ctx, field)
+			return ec.fieldContext_Mutation_updateTodoStatus(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().EditStatusTodo(ctx, fc.Args["id"].(string), fc.Args["input"].(model.EditStatusTodo))
+			return ec.Resolvers.Mutation().UpdateTodoStatus(ctx, fc.Args["id"].(string), fc.Args["input"].(model.UpdateTodoStatus))
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *model.Todo) graphql.Marshaler {
@@ -755,7 +755,7 @@ func (ec *executionContext) _Mutation_editStatusTodo(ctx context.Context, field 
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Mutation_editStatusTodo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_updateTodoStatus(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -772,7 +772,7 @@ func (ec *executionContext) fieldContext_Mutation_editStatusTodo(ctx context.Con
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_editStatusTodo_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_updateTodoStatus_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -2093,36 +2093,6 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputEditStatusTodo(ctx context.Context, obj any) (model.EditStatusTodo, error) {
-	var it model.EditStatusTodo
-	if obj == nil {
-		return it, nil
-	}
-
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"status"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "status":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			data, err := ec.unmarshalNTodoStatus2pathwayᚑbackendᚋgraphᚋmodelᚐTodoStatus(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Status = data
-		}
-	}
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj any) (model.NewTodo, error) {
 	var it model.NewTodo
 	if obj == nil {
@@ -2190,6 +2160,36 @@ func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj an
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateTodoStatus(ctx context.Context, obj any) (model.UpdateTodoStatus, error) {
+	var it model.UpdateTodoStatus
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"status"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "status":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			data, err := ec.unmarshalNTodoStatus2pathwayᚑbackendᚋgraphᚋmodelᚐTodoStatus(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Status = data
+		}
+	}
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -2238,9 +2238,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "editStatusTodo":
+		case "updateTodoStatus":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_editStatusTodo(ctx, field)
+				return ec._Mutation_updateTodoStatus(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -2789,11 +2789,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNEditStatusTodo2pathwayᚑbackendᚋgraphᚋmodelᚐEditStatusTodo(ctx context.Context, v any) (model.EditStatusTodo, error) {
-	res, err := ec.unmarshalInputEditStatusTodo(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -2873,6 +2868,11 @@ func (ec *executionContext) marshalNTodoStatus2pathwayᚑbackendᚋgraphᚋmodel
 
 func (ec *executionContext) unmarshalNUpdateTodo2pathwayᚑbackendᚋgraphᚋmodelᚐUpdateTodo(ctx context.Context, v any) (model.UpdateTodo, error) {
 	res, err := ec.unmarshalInputUpdateTodo(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateTodoStatus2pathwayᚑbackendᚋgraphᚋmodelᚐUpdateTodoStatus(ctx context.Context, v any) (model.UpdateTodoStatus, error) {
+	res, err := ec.unmarshalInputUpdateTodoStatus(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
