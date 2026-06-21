@@ -12,9 +12,9 @@ func (s TodoStatus) IsValid() bool {
 	switch s {
 	case TodoStatusNotStarted, TodoStatusInProgress, TodoStatusCompleted:
 		return true
-	default:
-		return false
 	}
+
+	return false
 }
 
 type Todo struct {
