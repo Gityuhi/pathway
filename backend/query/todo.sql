@@ -18,7 +18,7 @@ delete from todos
 where id = $1 and user_id = $2
 returning *;
 
--- name: EditStatusTodo :one
+-- name: UpdateTodoStatus :one
 update todos
 set status = $1
 where id = $2 and user_id = $3

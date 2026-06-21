@@ -61,33 +61,6 @@ func (q *Queries) DeleteTodo(ctx context.Context, arg DeleteTodoParams) (Todo, e
 	return i, err
 }
 
-const editStatusTodo = `-- name: EditStatusTodo :one
-update todos
-set status = $1
-where id = $2 and user_id = $3
-returning id, text, status, user_id, created_at, updated_at
-`
-
-type EditStatusTodoParams struct {
-	Status TodoStatus
-	ID     pgtype.UUID
-	UserID pgtype.UUID
-}
-
-func (q *Queries) EditStatusTodo(ctx context.Context, arg EditStatusTodoParams) (Todo, error) {
-	row := q.db.QueryRow(ctx, editStatusTodo, arg.Status, arg.ID, arg.UserID)
-	var i Todo
-	err := row.Scan(
-		&i.ID,
-		&i.Text,
-		&i.Status,
-		&i.UserID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
 const getTodos = `-- name: GetTodos :many
 select id, text, status, user_id, created_at, updated_at from todos 
 where user_id = $1
@@ -135,6 +108,33 @@ type UpdateTodoParams struct {
 
 func (q *Queries) UpdateTodo(ctx context.Context, arg UpdateTodoParams) (Todo, error) {
 	row := q.db.QueryRow(ctx, updateTodo, arg.Text, arg.ID, arg.UserID)
+	var i Todo
+	err := row.Scan(
+		&i.ID,
+		&i.Text,
+		&i.Status,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateTodoStatus = `-- name: UpdateTodoStatus :one
+update todos
+set status = $1
+where id = $2 and user_id = $3
+returning id, text, status, user_id, created_at, updated_at
+`
+
+type UpdateTodoStatusParams struct {
+	Status TodoStatus
+	ID     pgtype.UUID
+	UserID pgtype.UUID
+}
+
+func (q *Queries) UpdateTodoStatus(ctx context.Context, arg UpdateTodoStatusParams) (Todo, error) {
+	row := q.db.QueryRow(ctx, updateTodoStatus, arg.Status, arg.ID, arg.UserID)
 	var i Todo
 	err := row.Scan(
 		&i.ID,

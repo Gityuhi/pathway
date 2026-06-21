@@ -26,9 +26,9 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, id string, input mode
 	panic(fmt.Errorf("not implemented: UpdateTodo - updateTodo"))
 }
 
-// EditStatusTodo is the resolver for the editStatusTodo field.
-func (r *mutationResolver) EditStatusTodo(ctx context.Context, id string, input model.EditStatusTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: EditStatusTodo - editStatusTodo"))
+// UpdateTodoStatus is the resolver for the updateTodoStatus field.
+func (r *mutationResolver) UpdateTodoStatus(ctx context.Context, id string, input model.UpdateTodoStatus) (*model.Todo, error) {
+	panic(fmt.Errorf("not implemented: UpdateTodoStatus - updateTodoStatus"))
 }
 
 // Todos is the resolver for the todos field.

@@ -9,10 +9,6 @@ import (
 	"strconv"
 )
 
-type EditStatusTodo struct {
-	Status TodoStatus `json:"status"`
-}
-
 type Mutation struct {
 }
 
@@ -33,6 +29,10 @@ type Todo struct {
 
 type UpdateTodo struct {
 	Text string `json:"text"`
+}
+
+type UpdateTodoStatus struct {
+	Status TodoStatus `json:"status"`
 }
 
 type User struct {
