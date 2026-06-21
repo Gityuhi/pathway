@@ -26,7 +26,6 @@ type Query {
 
 input NewTodo {
   text: String!
-  userId: ID!
 }
 
 input UpdateTodo {
