@@ -1,0 +1,71 @@
+name: Gemini PR Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'supabase/**'
+
+concurrency:
+  group: gemini-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # PRにコメントを書き込むために必要
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get PR Diff
+        id: diff
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=1
+          git diff origin/${{ github.base_ref }}...HEAD -- \
+            backend/ \
+            frontend/ \
+            supabase/ > pr_diff.txt
+          if [ ! -s pr_diff.txt ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Configure Gemini review instructions
+        if: steps.diff.outputs.skip != 'true'
+        run: |
+          mkdir -p .gemini
+          echo 'GEMINI_SYSTEM_MD=.github/copilot-instructions.md' > .gemini/.env
+
+      - name: Run Gemini CLI Review
+        if: steps.diff.outputs.skip != 'true'
+        id: gemini_review
+        uses: google-github-actions/run-gemini-cli@v0
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: gemini-2.5-pro
+          prompt: |
+            以下の Pull Request 差分をレビューしてください: @pr_diff.txt
+
+            差分に含まれる領域（backend / frontend / supabase）のみレビューしてください。
+            レビューはすべて日本語で記述してください。
+            特に問題がない場合は「Good job! 特に見つかりませんでした。」とだけ返してください。
+
+      - name: Comment on PR
+        if: steps.diff.outputs.skip != 'true'
+        uses: actions/github-script@v7
+        env:
+          REVIEW_BODY: ${{ steps.gemini_review.outputs.summary }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "### 🤖 Geminiによるコードレビュー結果\n\n" + process.env.REVIEW_BODY
+            });
