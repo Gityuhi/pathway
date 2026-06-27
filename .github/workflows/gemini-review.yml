@@ -12,22 +12,32 @@ concurrency:
   group: gemini-review-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   review:
     runs-on: ubuntu-latest
+    timeout-minutes: 7
     permissions:
       contents: read
-      pull-requests: write # PRにコメントを書き込むために必要
+      pull-requests: write
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
 
       - name: Get PR Diff
         id: diff
         run: |
-          git fetch origin ${{ github.base_ref }} --depth=1
-          git diff origin/${{ github.base_ref }}...HEAD -- \
+          # shallow fetch では three-dot diff の merge base が取れないため、
+          # PR イベントの base/head SHA を直接比較する（merge base 不要）
+          git fetch --no-tags origin ${{ github.event.pull_request.base.sha }}
+          git diff "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" -- \
             backend/ \
             frontend/ \
             supabase/ > pr_diff.txt
@@ -45,9 +55,13 @@ jobs:
         if: steps.diff.outputs.skip != 'true'
         id: gemini_review
         uses: google-github-actions/run-gemini-cli@v0
+        env:
+          GEMINI_CLI_TRUST_WORKSPACE: 'true'
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: gemini-2.5-pro
+          workflow_name: gemini-review
+          github_pr_number: '${{ github.event.pull_request.number }}'
           prompt: |
             以下の Pull Request 差分をレビューしてください: @pr_diff.txt
 
