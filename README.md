@@ -44,3 +44,22 @@ Goのコードを自動生成する。
 
 ---
 ### graph/schema.resolvers.goにロジックを記述
+
+
+### 処理の流れ
+
+```mermaid
+flowchart LR
+    Browser[Playground]
+    MW["DevMiddleware"]
+    GQL["gqlgen /query"]
+    Resolver["resolver"]
+    UC["usecase"]
+    Repo["postgres"]
+
+    Browser --> MW
+    MW -->|"ctx に userID"| GQL
+    GQL --> Resolver
+    Resolver -->|"UserIDFromContext"| UC
+    UC --> Repo
+```
