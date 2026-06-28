@@ -63,3 +63,78 @@ flowchart LR
     Resolver -->|"UserIDFromContext"| UC
     UC --> Repo
 ```
+
+### 型変換の流れ
+```mermaid
+flowchart TB
+    subgraph client [Client / Playground]
+        JSON["JSON\n{ text: \"hello\" }"]
+    end
+
+    subgraph graph [graph 層]
+        Input["model.NewTodo\n(input 型)"]
+        Out["model.Todo\n(response 型)"]
+        Conv["converter.go\nentity → model"]
+    end
+
+    subgraph usecase [usecase 層]
+        UC["TodoService.CreateTodo\n(userID, text)"]
+    end
+
+    subgraph domain [domain 層]
+        ET["entity.Todo"]
+    end
+
+    subgraph infra [infra/postgres 層]
+        DBT["db.Todo"]
+        Map["mapper.go\ndb → entity"]
+    end
+
+    subgraph db [DB]
+        PG[(Postgres)]
+    end
+
+    JSON -->|"① gqlgen が自動 deserialize"| Input
+    Input -->|"② resolver: input.Text を取り出す"| UC
+    UC -->|"③ repository 呼び出し"| ET
+    ET -->|"④ interface の戻り値"| UC
+    UC --> ET
+    ET --> Conv
+    Conv --> Out
+    Out -->|"⑤ gqlgen が JSON serialize"| JSON
+
+    ET -.->|"repository 内部"| Map
+    Map --> DBT
+    DBT --> PG
+    PG --> DBT
+    DBT --> Map
+    Map --> ET
+
+```
+
+
+### server.goの流れ
+```mermaid
+flowchart TB
+    subgraph main ["main (server.go)"]
+        Pool["pgxpool.Pool"]
+        Q["db.New(pool)\n*sqlc.Queries"]
+        TR["postgres.NewTodoRepository"]
+        UR["postgres.NewUserRepository"]
+        TS["usecase.NewTodoService"]
+        R["graph.Resolver{...}"]
+        H["gqlgen handler"]
+        MW["DevAuthMiddleware"]
+    end
+
+    Pool --> Q
+    Q --> TR
+    Q --> UR
+    TR --> TS
+    TS --> R
+    UR --> R
+    R --> H
+    H --> MW
+    MW --> HTTP["/query"]
+
+```

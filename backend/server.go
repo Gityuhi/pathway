@@ -7,7 +7,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	db "pathway-backend/db/sqlc"
 	"pathway-backend/graph"
+	"pathway-backend/internal/infrastructure/middleware"
+	"pathway-backend/internal/infrastructure/postgres"
+	"pathway-backend/internal/usecase"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -54,7 +58,18 @@ func main() {
 		port = defaultPort
 	}
 
-	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	queries := db.New(pool)
+
+	todoRepo := postgres.NewTodoRepository(queries)
+	userRepo := postgres.NewUserRepository(queries)
+	todoService := usecase.NewTodoService(todoRepo)
+
+	resolver := &graph.Resolver{
+		TodoService: todoService,
+		Users:       userRepo,
+	}
+
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
@@ -68,7 +83,7 @@ func main() {
 	})
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	http.Handle("/query", middleware.DevAuthMiddleware(srv))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
