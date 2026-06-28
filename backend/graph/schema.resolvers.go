@@ -7,33 +7,74 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"pathway-backend/graph/model"
+	"pathway-backend/internal/domain/entity"
+	"pathway-backend/internal/infrastructure/middleware"
 )
 
 // CreateTodo is the resolver for the createTodo field.
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
+	userID, err := middleware.UserIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	todo, err := r.TodoService.CreateTodo(ctx, userID, input.Text)
+	if err != nil {
+		return nil, err
+	}
+	return ToModelTodo(ctx, r.Users, todo)
 }
 
 // DeleteTodo is the resolver for the deleteTodo field.
 func (r *mutationResolver) DeleteTodo(ctx context.Context, id string) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: DeleteTodo - deleteTodo"))
+	userID, err := middleware.UserIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	todo, err := r.TodoService.DeleteTodo(ctx, userID, id)
+	if err != nil {
+		return nil, err
+	}
+	return ToModelTodo(ctx, r.Users, todo)
 }
 
 // UpdateTodo is the resolver for the updateTodo field.
 func (r *mutationResolver) UpdateTodo(ctx context.Context, id string, input model.UpdateTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: UpdateTodo - updateTodo"))
+	userID, err := middleware.UserIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	todo, err := r.TodoService.UpdateTodo(ctx, userID, id, input.Text)
+	if err != nil {
+		return nil, err
+	}
+	return ToModelTodo(ctx, r.Users, todo)
 }
 
 // UpdateTodoStatus is the resolver for the updateTodoStatus field.
 func (r *mutationResolver) UpdateTodoStatus(ctx context.Context, id string, input model.UpdateTodoStatus) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: UpdateTodoStatus - updateTodoStatus"))
+	userID, err := middleware.UserIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	todo, err := r.TodoService.UpdateTodoStatus(ctx, userID, id, entity.TodoStatus(input.Status))
+	if err != nil {
+		return nil, err
+	}
+	return ToModelTodo(ctx, r.Users, todo)
 }
 
 // Todos is the resolver for the todos field.
 func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: Todos - todos"))
+	userID, err := middleware.UserIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	todos, err := r.TodoService.GetTodos(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return ToModelTodos(ctx, r.Users, todos)
 }
 
 // Mutation returns MutationResolver implementation.
