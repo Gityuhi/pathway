@@ -11,7 +11,7 @@ import (
 func CorsMiddleware(next http.Handler) http.Handler {
 	origins := parseAllowedOrigins(os.Getenv("CORS_ALLOWED_ORIGINS"))
 	if len(origins) == 0 {
-		origins = []string{"http://localhost:5173"}
+		panic("CORS_ALLOWED_ORIGINS is not set")
 	}
  
 	c := cors.New(cors.Options{
