@@ -8,7 +8,7 @@ import (
 func AuthChainMiddleware(next http.Handler) http.Handler {
 	mode := os.Getenv("AUTH_MODE")
 	if mode == "" {
-		mode = "dev"
+		mode = "supabase"
 	}
 
 	switch mode {
