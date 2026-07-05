@@ -1,4 +1,5 @@
 import { useState, type ComponentProps, type SubmitEvent } from "react"
+import { useNavigate } from "react-router"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,15 +18,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { supabase } from "@/lib/supabase"
 
-type LoginFormProps = ComponentProps<"div"> & {
-  onSwitchToSignup: () => void
-}
+type LoginFormProps = ComponentProps<"div">
 
-export function LoginForm({
-  className,
-  onSwitchToSignup,
-  ...props
-}: LoginFormProps) {
+export function LoginForm({ className, ...props }: LoginFormProps) {
+  const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
@@ -91,7 +87,11 @@ export function LoginForm({
                 </Button>
                 <FieldDescription className="text-center">
                   Don&apos;t have an account?{" "}
-                  <Button type="button" variant="link" onClick={onSwitchToSignup}>
+                  <Button
+                    type="button"
+                    variant="link"
+                    onClick={() => navigate("/signup")}
+                  >
                     Sign up
                   </Button>
                 </FieldDescription>

@@ -1,4 +1,5 @@
 import { useState, type ComponentProps, type SubmitEvent } from "react"
+import { useNavigate } from "react-router"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -16,11 +17,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { supabase } from "@/lib/supabase"
 
-type SignupFormProps = ComponentProps<typeof Card> & {
-  onSwitchToLogin: () => void
-}
+type SignupFormProps = ComponentProps<typeof Card>
 
-export function SignupForm({ onSwitchToLogin, ...props }: SignupFormProps) {
+export function SignupForm(props: SignupFormProps) {
+  const navigate = useNavigate()
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -119,7 +119,11 @@ export function SignupForm({ onSwitchToLogin, ...props }: SignupFormProps) {
               </Button>
               <FieldDescription className="text-center">
                 Already have an account?{" "}
-                <Button type="button" variant="link" onClick={onSwitchToLogin}>
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={() => navigate("/login")}
+                >
                   Login
                 </Button>
               </FieldDescription>
