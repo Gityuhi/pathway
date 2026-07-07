@@ -54,6 +54,14 @@ func (ns NullTodoStatus) Value() (driver.Value, error) {
 	return string(ns.TodoStatus), nil
 }
 
+type DailyLog struct {
+	UserID      pgtype.UUID
+	LogDate     pgtype.Date
+	IsCompleted bool
+	CreatedAt   pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
+}
+
 type Todo struct {
 	ID        pgtype.UUID
 	Text      string
