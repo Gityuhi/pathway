@@ -9,6 +9,11 @@ import (
 	"strconv"
 )
 
+type DailyLog struct {
+	Date        string `json:"date"`
+	IsCompleted bool   `json:"isCompleted"`
+}
+
 type Mutation struct {
 }
 

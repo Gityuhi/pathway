@@ -20,8 +20,14 @@ type User {
   name: String!
 }
 
+type DailyLog {
+  date: String!
+  isCompleted: Boolean!
+}
+
 type Query {
   todos: [Todo!]!
+  dailyLogs(from: String!, to: String!): [DailyLog!]!
 }
 
 input NewTodo {

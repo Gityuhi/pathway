@@ -36,6 +36,11 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	DailyLog struct {
+		Date        func(childComplexity int) int
+		IsCompleted func(childComplexity int) int
+	}
+
 	Mutation struct {
 		CreateTodo       func(childComplexity int, input model.NewTodo) int
 		DeleteTodo       func(childComplexity int, id string) int
@@ -44,7 +49,8 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Todos func(childComplexity int) int
+		DailyLogs func(childComplexity int, from string, to string) int
+		Todos     func(childComplexity int) int
 	}
 
 	Todo struct {
@@ -68,6 +74,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Todos(ctx context.Context) ([]*model.Todo, error)
+	DailyLogs(ctx context.Context, from string, to string) ([]*model.DailyLog, error)
 }
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -83,6 +90,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	ec := newExecutionContext(nil, e, nil)
 	_ = ec
 	switch typeName + "." + field {
+
+	case "DailyLog.date":
+		if e.ComplexityRoot.DailyLog.Date == nil {
+			break
+		}
+
+		return e.ComplexityRoot.DailyLog.Date(childComplexity), true
+	case "DailyLog.isCompleted":
+		if e.ComplexityRoot.DailyLog.IsCompleted == nil {
+			break
+		}
+
+		return e.ComplexityRoot.DailyLog.IsCompleted(childComplexity), true
 
 	case "Mutation.createTodo":
 		if e.ComplexityRoot.Mutation.CreateTodo == nil {
@@ -128,6 +148,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.UpdateTodoStatus(childComplexity, args["id"].(string), args["input"].(model.UpdateTodoStatus)), true
+
+	case "Query.dailyLogs":
+		if e.ComplexityRoot.Query.DailyLogs == nil {
+			break
+		}
+
+		args, err := ec.field_Query_dailyLogs_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.DailyLogs(childComplexity, args["from"].(string), args["to"].(string)), true
 
 	case "Query.todos":
 		if e.ComplexityRoot.Query.Todos == nil {
@@ -282,8 +314,14 @@ type User {
   name: String!
 }
 
+type DailyLog {
+  date: String!
+  isCompleted: Boolean!
+}
+
 type Query {
   todos: [Todo!]!
+  dailyLogs(from: String!, to: String!): [DailyLog!]!
 }
 
 input NewTodo {
@@ -311,6 +349,16 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // childFields_* functions provide shared child field context lookups.
 // Each function is generated once per unique object type, deduplicating the
 // switch statements that were previously inlined in every fieldContext_* function.
+
+func (ec *executionContext) childFields_DailyLog(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "date":
+		return ec.fieldContext_DailyLog_date(ctx, field)
+	case "isCompleted":
+		return ec.fieldContext_DailyLog_isCompleted(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type DailyLog", field.Name)
+}
 
 func (ec *executionContext) childFields_Todo(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
@@ -538,6 +586,28 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_dailyLogs_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "from",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["from"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "to",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["to"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field___Directive_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -601,6 +671,52 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _DailyLog_date(ctx context.Context, field graphql.CollectedField, obj *model.DailyLog) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_DailyLog_date(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Date, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_DailyLog_date(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("DailyLog", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _DailyLog_isCompleted(ctx context.Context, field graphql.CollectedField, obj *model.DailyLog) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_DailyLog_isCompleted(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.IsCompleted, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_DailyLog_isCompleted(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("DailyLog", field, false, false, errors.New("field of type Boolean does not have child fields"))
+}
 
 func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -806,6 +922,50 @@ func (ec *executionContext) fieldContext_Query_todos(_ context.Context, field gr
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return ec.childFields_Todo(ctx, field)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_dailyLogs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_dailyLogs(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().DailyLogs(ctx, fc.Args["from"].(string), fc.Args["to"].(string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.DailyLog) graphql.Marshaler {
+			return ec.marshalNDailyLog2ᚕᚖpathwayᚑbackendᚋgraphᚋmodelᚐDailyLogᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Query_dailyLogs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_DailyLog(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_dailyLogs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -2190,6 +2350,50 @@ func (ec *executionContext) unmarshalInputUpdateTodoStatus(ctx context.Context, 
 
 // region    **************************** object.gotpl ****************************
 
+var dailyLogImplementors = []string{"DailyLog"}
+
+func (ec *executionContext) _DailyLog(ctx context.Context, sel ast.SelectionSet, obj *model.DailyLog) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, dailyLogImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DailyLog")
+		case "date":
+			out.Values[i] = ec._DailyLog_date(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "isCompleted":
+			out.Values[i] = ec._DailyLog_isCompleted(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferred), math.MaxInt32)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -2289,6 +2493,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_todos(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "dailyLogs":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_dailyLogs(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -2779,6 +3005,32 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNDailyLog2ᚕᚖpathwayᚑbackendᚋgraphᚋmodelᚐDailyLogᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.DailyLog) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNDailyLog2ᚖpathwayᚑbackendᚋgraphᚋmodelᚐDailyLog(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNDailyLog2ᚖpathwayᚑbackendᚋgraphᚋmodelᚐDailyLog(ctx context.Context, sel ast.SelectionSet, v *model.DailyLog) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DailyLog(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
