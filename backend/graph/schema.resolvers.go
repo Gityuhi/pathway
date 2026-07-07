@@ -7,6 +7,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 	"pathway-backend/graph/model"
 	"pathway-backend/internal/domain/entity"
 	"pathway-backend/internal/infrastructure/middleware"
@@ -75,6 +76,11 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 		return nil, err
 	}
 	return ToModelTodos(ctx, r.Users, todos)
+}
+
+// DailyLogs is the resolver for the dailyLogs field.
+func (r *queryResolver) DailyLogs(ctx context.Context, from string, to string) ([]*model.DailyLog, error) {
+	panic(fmt.Errorf("not implemented: DailyLogs - dailyLogs"))
 }
 
 // Mutation returns MutationResolver implementation.
