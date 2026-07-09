@@ -7,7 +7,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"pathway-backend/graph/model"
 	"pathway-backend/internal/domain/entity"
 	"pathway-backend/internal/infrastructure/middleware"
@@ -65,6 +64,18 @@ func (r *mutationResolver) UpdateTodoStatus(ctx context.Context, id string, inpu
 	return ToModelTodo(ctx, r.Users, todo)
 }
 
+// CatchUpDailyLogs is the resolver for the catchUpDailyLogs field.
+func (r *mutationResolver) CatchUpDailyLogs(ctx context.Context) (bool, error) {
+	userID, err := middleware.UserIDFromContext(ctx)
+	if err != nil {
+		return false, err
+	}
+	if err := r.LogService.CatchUp(ctx, userID); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 // Todos is the resolver for the todos field.
 func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 	userID, err := middleware.UserIDFromContext(ctx)
@@ -80,7 +91,15 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 
 // DailyLogs is the resolver for the dailyLogs field.
 func (r *queryResolver) DailyLogs(ctx context.Context, from string, to string) ([]*model.DailyLog, error) {
-	panic(fmt.Errorf("not implemented: DailyLogs - dailyLogs"))
+	userID, err := middleware.UserIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	logs, err := r.LogService.GetDailyLogs(ctx, userID, from, to)
+	if err != nil {
+		return nil, err
+	}
+	return ToModelDailyLogs(logs), nil
 }
 
 // Mutation returns MutationResolver implementation.

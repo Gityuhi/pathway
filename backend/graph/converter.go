@@ -39,3 +39,21 @@ func ToModelTodos(ctx context.Context, users repository.UserRepository, todos []
 	}
 	return result, nil
 }
+
+func ToModelDailyLog(log entity.DailyLog) *model.DailyLog {
+	return &model.DailyLog{
+		Date:        log.Date,
+		IsCompleted: log.IsCompleted,
+	}
+}
+
+func ToModelDailyLogs(logs []entity.DailyLog) []*model.DailyLog {
+	if len(logs) == 0 {
+		return []*model.DailyLog{}
+	}
+	result := make([]*model.DailyLog, 0, len(logs))
+	for _, log := range logs {
+		result = append(result, ToModelDailyLog(log))
+	}
+	return result
+}
