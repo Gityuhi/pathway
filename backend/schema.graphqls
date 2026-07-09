@@ -47,4 +47,5 @@ type Mutation {
   deleteTodo(id: ID!): Todo!
   updateTodo(id: ID!, input: UpdateTodo!): Todo!
   updateTodoStatus(id: ID!, input: UpdateTodoStatus!): Todo!
+  catchUpDailyLogs: Boolean!
 }

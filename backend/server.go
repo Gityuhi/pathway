@@ -61,11 +61,18 @@ func main() {
 	queries := db.New(pool)
 
 	todoRepo := postgres.NewTodoRepository(queries)
-	userRepo := postgres.NewUserRepository(queries)
 	todoService := usecase.NewTodoService(todoRepo)
+
+	logRepo := postgres.NewLogRepository(queries)
+	logService := usecase.NewLogService(logRepo)
+
+	userRepo := postgres.NewUserRepository(queries)
+	
+	
 
 	resolver := &graph.Resolver{
 		TodoService: todoService,
+		LogService: logService,
 		Users:       userRepo,
 	}
 

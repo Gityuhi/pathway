@@ -42,6 +42,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		CatchUpDailyLogs func(childComplexity int) int
 		CreateTodo       func(childComplexity int, input model.NewTodo) int
 		DeleteTodo       func(childComplexity int, id string) int
 		UpdateTodo       func(childComplexity int, id string, input model.UpdateTodo) int
@@ -71,6 +72,7 @@ type MutationResolver interface {
 	DeleteTodo(ctx context.Context, id string) (*model.Todo, error)
 	UpdateTodo(ctx context.Context, id string, input model.UpdateTodo) (*model.Todo, error)
 	UpdateTodoStatus(ctx context.Context, id string, input model.UpdateTodoStatus) (*model.Todo, error)
+	CatchUpDailyLogs(ctx context.Context) (bool, error)
 }
 type QueryResolver interface {
 	Todos(ctx context.Context) ([]*model.Todo, error)
@@ -104,6 +106,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.DailyLog.IsCompleted(childComplexity), true
 
+	case "Mutation.catchUpDailyLogs":
+		if e.ComplexityRoot.Mutation.CatchUpDailyLogs == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Mutation.CatchUpDailyLogs(childComplexity), true
 	case "Mutation.createTodo":
 		if e.ComplexityRoot.Mutation.CreateTodo == nil {
 			break
@@ -341,6 +349,7 @@ type Mutation {
   deleteTodo(id: ID!): Todo!
   updateTodo(id: ID!, input: UpdateTodo!): Todo!
   updateTodoStatus(id: ID!, input: UpdateTodoStatus!): Todo!
+  catchUpDailyLogs: Boolean!
 }
 `, BuiltIn: false},
 }
@@ -892,6 +901,29 @@ func (ec *executionContext) fieldContext_Mutation_updateTodoStatus(ctx context.C
 		return fc, err
 	}
 	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_catchUpDailyLogs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_catchUpDailyLogs(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Mutation().CatchUpDailyLogs(ctx)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_catchUpDailyLogs(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Mutation", field, true, true, errors.New("field of type Boolean does not have child fields"))
 }
 
 func (ec *executionContext) _Query_todos(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2437,6 +2469,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "updateTodoStatus":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateTodoStatus(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "catchUpDailyLogs":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_catchUpDailyLogs(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

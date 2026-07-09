@@ -6,6 +6,7 @@ import (
 	db "pathway-backend/db/sqlc"
 	"pathway-backend/internal/domain"
 	"pathway-backend/internal/domain/entity"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -25,6 +26,21 @@ func pgUUIDToString(p pgtype.UUID) (string, error) {
 		return "", fmt.Errorf("invalid uuid")
 	}
 	return p.String(), nil
+}
+
+func stringToPgDate(s string) (pgtype.Date, error) {
+	t, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		return pgtype.Date{}, fmt.Errorf("parse date: %w", err)
+	}
+	return pgtype.Date{Time: t, Valid: true}, nil
+}
+
+func pgDateToString(d pgtype.Date) (string, error) {
+	if !d.Valid {
+		return "", fmt.Errorf("invalid date")
+	}
+	return d.Time.Format("2006-01-02"), nil
 }
 
 
@@ -67,6 +83,29 @@ func toEntityUser(row db.User) (entity.User, error) {
 		ID:   id,
 		Name: row.Name,
 	}, nil
+}
+
+func toEntityDailyLog(row db.GetDailyLogsRow) (entity.DailyLog, error) {
+	date, err := pgDateToString(row.LogDate)
+	if err != nil {
+		return entity.DailyLog{}, err
+	}
+	return entity.DailyLog{
+		Date:        date,
+		IsCompleted: row.IsCompleted,
+	}, nil
+}
+
+func toEntityDailyLogs(rows []db.GetDailyLogsRow) ([]entity.DailyLog, error) {
+	logs := make([]entity.DailyLog, 0, len(rows))
+	for _, row := range rows {
+		log, err := toEntityDailyLog(row)
+		if err != nil {
+			return nil, err
+		}
+		logs = append(logs, log)
+	}
+	return logs, nil
 }
 
 // resolverのエラーハンドリング用
