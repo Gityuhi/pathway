@@ -34,6 +34,14 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: "/log",
+        element: (
+          <ProtectedRoute>
+            <TodosPage />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 ])

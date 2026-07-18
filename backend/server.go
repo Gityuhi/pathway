@@ -19,6 +19,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -36,6 +37,10 @@ func main() {
 		log.Fatal("cannot parse db source:", err)
 	}
 	config.MaxConns = 10
+	// Supabase pooler (PgBouncer transaction mode) 向け:
+	// prepared statement 本体はキャッシュせず、describe 結果のみキャッシュする
+	// prepared statementエラーが発生したので、キャッシュを無効化する
+	config.ConnConfig.DefaultQueryExecMode = pgx.QueryExecModeCacheDescribe
 
 	ctx := context.Background()
 
