@@ -7,15 +7,34 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { LogApp } from "@/features/logs/components/LogApp"
+import { RoadmapApp } from "@/features/roadmap/components/RoadmapApp"
 import { TodoApp } from "@/features/todos/components/TodoApp"
 import { supabase } from "@/lib/supabase"
 import { apolloClient } from "@/lib/apollo"
+
+const navRoutes: Record<NavKey, string> = {
+  todos: "/",
+  log: "/log",
+  roadmap: "/roadmap",
+}
+
+function navKeyFromPathname(pathname: string): NavKey {
+  if (pathname === "/log") return "log"
+  if (pathname === "/roadmap") return "roadmap"
+  return "todos"
+}
+
+const navTitles: Record<NavKey, string> = {
+  todos: "Todos",
+  log: "Log",
+  roadmap: "Roadmap",
+}
 
 export function TodosPage() {
   const { session } = useOutletContext<{ session: Session | null }>()
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const active: NavKey = pathname === "/log" ? "log" : "todos"
+  const active = navKeyFromPathname(pathname)
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -24,10 +43,10 @@ export function TodosPage() {
   }
 
   const handleSelect = (key: NavKey) => {
-    navigate(key === "log" ? "/log" : "/")
+    navigate(navRoutes[key])
   }
 
-  const title = active === "log" ? "Log" : "Todos"
+  const title = navTitles[active]
 
   return (
     <SidebarProvider>
@@ -49,7 +68,13 @@ export function TodosPage() {
               : "p-6"
           }
         >
-          {active === "log" ? <LogApp /> : <TodoApp />}
+          {active === "log" ? (
+            <LogApp />
+          ) : active === "roadmap" ? (
+            <RoadmapApp />
+          ) : (
+            <TodoApp />
+          )}
         </div>
       </SidebarInset>
     </SidebarProvider>
