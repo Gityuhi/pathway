@@ -62,6 +62,22 @@ type DailyLog struct {
 	UpdatedAt   pgtype.Timestamptz
 }
 
+type Node struct {
+	ID        pgtype.UUID
+	RoadmapID pgtype.UUID
+	ParentID  pgtype.UUID
+	Title     string
+	CreatedAt pgtype.Timestamptz
+}
+
+type Roadmap struct {
+	ID        pgtype.UUID
+	UserID    pgtype.UUID
+	Title     string
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+}
+
 type Todo struct {
 	ID        pgtype.UUID
 	Text      string
