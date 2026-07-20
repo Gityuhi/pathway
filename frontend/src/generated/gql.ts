@@ -17,6 +17,8 @@ type Documents = {
     "\n  mutation CatchUpDailyLogs {\n    catchUpDailyLogs\n  }\n": typeof types.CatchUpDailyLogsDocument,
     "\n  query DailyLogs($from: String!, $to: String!) {\n    dailyLogs(from: $from, to: $to) {\n      date\n      isCompleted\n    }\n  }\n": typeof types.DailyLogsDocument,
     "\n  mutation CreateRoadmap($input: NewRoadmap!) {\n    createRoadmap(input: $input) {\n      id\n      title\n      createdAt\n    }\n  }\n": typeof types.CreateRoadmapDocument,
+    "\n  mutation CreateRoadmapNode($input: NewRoadmapNode!) {\n    createRoadmapNode(input: $input) {\n      id\n      roadmapId\n      parentId\n      title\n    }\n  }\n": typeof types.CreateRoadmapNodeDocument,
+    "\n  mutation DeleteRoadmapNode($id: ID!) {\n    deleteRoadmapNode(id: $id) {\n      id\n    }\n  }\n": typeof types.DeleteRoadmapNodeDocument,
     "\n  query RoadmapNodes($roadmapId: ID!) {\n    roadmapNodes(roadmapId: $roadmapId) {\n      id\n      roadmapId\n      parentId\n      title\n    }\n  }\n": typeof types.RoadmapNodesDocument,
     "\n  query Roadmaps {\n    roadmaps {\n      id\n      title\n      createdAt\n    }\n  }\n": typeof types.RoadmapsDocument,
     "\n  mutation CreateTodo($input: NewTodo!) {\n    createTodo(input: $input) {\n      id\n      text\n      status\n      user {\n        id\n        name\n      }\n    }\n  }\n": typeof types.CreateTodoDocument,
@@ -29,6 +31,8 @@ const documents: Documents = {
     "\n  mutation CatchUpDailyLogs {\n    catchUpDailyLogs\n  }\n": types.CatchUpDailyLogsDocument,
     "\n  query DailyLogs($from: String!, $to: String!) {\n    dailyLogs(from: $from, to: $to) {\n      date\n      isCompleted\n    }\n  }\n": types.DailyLogsDocument,
     "\n  mutation CreateRoadmap($input: NewRoadmap!) {\n    createRoadmap(input: $input) {\n      id\n      title\n      createdAt\n    }\n  }\n": types.CreateRoadmapDocument,
+    "\n  mutation CreateRoadmapNode($input: NewRoadmapNode!) {\n    createRoadmapNode(input: $input) {\n      id\n      roadmapId\n      parentId\n      title\n    }\n  }\n": types.CreateRoadmapNodeDocument,
+    "\n  mutation DeleteRoadmapNode($id: ID!) {\n    deleteRoadmapNode(id: $id) {\n      id\n    }\n  }\n": types.DeleteRoadmapNodeDocument,
     "\n  query RoadmapNodes($roadmapId: ID!) {\n    roadmapNodes(roadmapId: $roadmapId) {\n      id\n      roadmapId\n      parentId\n      title\n    }\n  }\n": types.RoadmapNodesDocument,
     "\n  query Roadmaps {\n    roadmaps {\n      id\n      title\n      createdAt\n    }\n  }\n": types.RoadmapsDocument,
     "\n  mutation CreateTodo($input: NewTodo!) {\n    createTodo(input: $input) {\n      id\n      text\n      status\n      user {\n        id\n        name\n      }\n    }\n  }\n": types.CreateTodoDocument,
@@ -64,6 +68,14 @@ export function graphql(source: "\n  query DailyLogs($from: String!, $to: String
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation CreateRoadmap($input: NewRoadmap!) {\n    createRoadmap(input: $input) {\n      id\n      title\n      createdAt\n    }\n  }\n"): (typeof documents)["\n  mutation CreateRoadmap($input: NewRoadmap!) {\n    createRoadmap(input: $input) {\n      id\n      title\n      createdAt\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateRoadmapNode($input: NewRoadmapNode!) {\n    createRoadmapNode(input: $input) {\n      id\n      roadmapId\n      parentId\n      title\n    }\n  }\n"): (typeof documents)["\n  mutation CreateRoadmapNode($input: NewRoadmapNode!) {\n    createRoadmapNode(input: $input) {\n      id\n      roadmapId\n      parentId\n      title\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation DeleteRoadmapNode($id: ID!) {\n    deleteRoadmapNode(id: $id) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation DeleteRoadmapNode($id: ID!) {\n    deleteRoadmapNode(id: $id) {\n      id\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
