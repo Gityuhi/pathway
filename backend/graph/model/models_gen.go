@@ -17,11 +17,34 @@ type DailyLog struct {
 type Mutation struct {
 }
 
+type NewRoadmap struct {
+	Title string `json:"title"`
+}
+
+type NewRoadmapNode struct {
+	RoadmapID string  `json:"roadmapId"`
+	ParentID  *string `json:"parentId,omitempty"`
+	Title     string  `json:"title"`
+}
+
 type NewTodo struct {
 	Text string `json:"text"`
 }
 
 type Query struct {
+}
+
+type Roadmap struct {
+	ID        string `json:"id"`
+	Title     string `json:"title"`
+	CreatedAt string `json:"createdAt"`
+}
+
+type RoadmapNode struct {
+	ID        string  `json:"id"`
+	RoadmapID string  `json:"roadmapId"`
+	ParentID  *string `json:"parentId,omitempty"`
+	Title     string  `json:"title"`
 }
 
 type Todo struct {

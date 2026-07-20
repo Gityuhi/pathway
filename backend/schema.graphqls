@@ -25,9 +25,24 @@ type DailyLog {
   isCompleted: Boolean!
 }
 
+type Roadmap {
+  id: ID!
+  title: String!
+  createdAt: String!
+}
+
+type RoadmapNode {
+  id: ID!
+  roadmapId: ID!
+  parentId: ID
+  title: String!
+}
+
 type Query {
   todos: [Todo!]!
   dailyLogs(from: String!, to: String!): [DailyLog!]!
+  roadmaps: [Roadmap!]!
+  roadmapNodes(roadmapId: ID!): [RoadmapNode!]!
 }
 
 input NewTodo {
@@ -42,10 +57,23 @@ input UpdateTodoStatus {
   status: TodoStatus!
 }
 
+input NewRoadmap {
+  title: String!
+}
+
+input NewRoadmapNode {
+  roadmapId: ID!
+  parentId: ID
+  title: String!
+}
+
 type Mutation {
   createTodo(input: NewTodo!): Todo!
   deleteTodo(id: ID!): Todo!
   updateTodo(id: ID!, input: UpdateTodo!): Todo!
   updateTodoStatus(id: ID!, input: UpdateTodoStatus!): Todo!
   catchUpDailyLogs: Boolean!
+  createRoadmap(input: NewRoadmap!): Roadmap!
+  createRoadmapNode(input: NewRoadmapNode!): RoadmapNode!
+  deleteRoadmapNode(id: ID!): RoadmapNode!
 }

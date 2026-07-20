@@ -42,16 +42,34 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CatchUpDailyLogs func(childComplexity int) int
-		CreateTodo       func(childComplexity int, input model.NewTodo) int
-		DeleteTodo       func(childComplexity int, id string) int
-		UpdateTodo       func(childComplexity int, id string, input model.UpdateTodo) int
-		UpdateTodoStatus func(childComplexity int, id string, input model.UpdateTodoStatus) int
+		CatchUpDailyLogs  func(childComplexity int) int
+		CreateRoadmap     func(childComplexity int, input model.NewRoadmap) int
+		CreateRoadmapNode func(childComplexity int, input model.NewRoadmapNode) int
+		CreateTodo        func(childComplexity int, input model.NewTodo) int
+		DeleteRoadmapNode func(childComplexity int, id string) int
+		DeleteTodo        func(childComplexity int, id string) int
+		UpdateTodo        func(childComplexity int, id string, input model.UpdateTodo) int
+		UpdateTodoStatus  func(childComplexity int, id string, input model.UpdateTodoStatus) int
 	}
 
 	Query struct {
-		DailyLogs func(childComplexity int, from string, to string) int
-		Todos     func(childComplexity int) int
+		DailyLogs    func(childComplexity int, from string, to string) int
+		RoadmapNodes func(childComplexity int, roadmapID string) int
+		Roadmaps     func(childComplexity int) int
+		Todos        func(childComplexity int) int
+	}
+
+	Roadmap struct {
+		CreatedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Title     func(childComplexity int) int
+	}
+
+	RoadmapNode struct {
+		ID        func(childComplexity int) int
+		ParentID  func(childComplexity int) int
+		RoadmapID func(childComplexity int) int
+		Title     func(childComplexity int) int
 	}
 
 	Todo struct {
@@ -73,10 +91,15 @@ type MutationResolver interface {
 	UpdateTodo(ctx context.Context, id string, input model.UpdateTodo) (*model.Todo, error)
 	UpdateTodoStatus(ctx context.Context, id string, input model.UpdateTodoStatus) (*model.Todo, error)
 	CatchUpDailyLogs(ctx context.Context) (bool, error)
+	CreateRoadmap(ctx context.Context, input model.NewRoadmap) (*model.Roadmap, error)
+	CreateRoadmapNode(ctx context.Context, input model.NewRoadmapNode) (*model.RoadmapNode, error)
+	DeleteRoadmapNode(ctx context.Context, id string) (*model.RoadmapNode, error)
 }
 type QueryResolver interface {
 	Todos(ctx context.Context) ([]*model.Todo, error)
 	DailyLogs(ctx context.Context, from string, to string) ([]*model.DailyLog, error)
+	Roadmaps(ctx context.Context) ([]*model.Roadmap, error)
+	RoadmapNodes(ctx context.Context, roadmapID string) ([]*model.RoadmapNode, error)
 }
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -112,6 +135,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.CatchUpDailyLogs(childComplexity), true
+	case "Mutation.createRoadmap":
+		if e.ComplexityRoot.Mutation.CreateRoadmap == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createRoadmap_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.CreateRoadmap(childComplexity, args["input"].(model.NewRoadmap)), true
+	case "Mutation.createRoadmapNode":
+		if e.ComplexityRoot.Mutation.CreateRoadmapNode == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createRoadmapNode_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.CreateRoadmapNode(childComplexity, args["input"].(model.NewRoadmapNode)), true
 	case "Mutation.createTodo":
 		if e.ComplexityRoot.Mutation.CreateTodo == nil {
 			break
@@ -123,6 +168,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.CreateTodo(childComplexity, args["input"].(model.NewTodo)), true
+	case "Mutation.deleteRoadmapNode":
+		if e.ComplexityRoot.Mutation.DeleteRoadmapNode == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteRoadmapNode_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.DeleteRoadmapNode(childComplexity, args["id"].(string)), true
 	case "Mutation.deleteTodo":
 		if e.ComplexityRoot.Mutation.DeleteTodo == nil {
 			break
@@ -169,12 +225,73 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Query.DailyLogs(childComplexity, args["from"].(string), args["to"].(string)), true
 
+	case "Query.roadmapNodes":
+		if e.ComplexityRoot.Query.RoadmapNodes == nil {
+			break
+		}
+
+		args, err := ec.field_Query_roadmapNodes_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.RoadmapNodes(childComplexity, args["roadmapId"].(string)), true
+	case "Query.roadmaps":
+		if e.ComplexityRoot.Query.Roadmaps == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Query.Roadmaps(childComplexity), true
 	case "Query.todos":
 		if e.ComplexityRoot.Query.Todos == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Query.Todos(childComplexity), true
+
+	case "Roadmap.createdAt":
+		if e.ComplexityRoot.Roadmap.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Roadmap.CreatedAt(childComplexity), true
+	case "Roadmap.id":
+		if e.ComplexityRoot.Roadmap.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Roadmap.ID(childComplexity), true
+	case "Roadmap.title":
+		if e.ComplexityRoot.Roadmap.Title == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Roadmap.Title(childComplexity), true
+
+	case "RoadmapNode.id":
+		if e.ComplexityRoot.RoadmapNode.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RoadmapNode.ID(childComplexity), true
+	case "RoadmapNode.parentId":
+		if e.ComplexityRoot.RoadmapNode.ParentID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RoadmapNode.ParentID(childComplexity), true
+	case "RoadmapNode.roadmapId":
+		if e.ComplexityRoot.RoadmapNode.RoadmapID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RoadmapNode.RoadmapID(childComplexity), true
+	case "RoadmapNode.title":
+		if e.ComplexityRoot.RoadmapNode.Title == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RoadmapNode.Title(childComplexity), true
 
 	case "Todo.id":
 		if e.ComplexityRoot.Todo.ID == nil {
@@ -222,6 +339,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputNewRoadmap,
+		ec.unmarshalInputNewRoadmapNode,
 		ec.unmarshalInputNewTodo,
 		ec.unmarshalInputUpdateTodo,
 		ec.unmarshalInputUpdateTodoStatus,
@@ -327,9 +446,24 @@ type DailyLog {
   isCompleted: Boolean!
 }
 
+type Roadmap {
+  id: ID!
+  title: String!
+  createdAt: String!
+}
+
+type RoadmapNode {
+  id: ID!
+  roadmapId: ID!
+  parentId: ID
+  title: String!
+}
+
 type Query {
   todos: [Todo!]!
   dailyLogs(from: String!, to: String!): [DailyLog!]!
+  roadmaps: [Roadmap!]!
+  roadmapNodes(roadmapId: ID!): [RoadmapNode!]!
 }
 
 input NewTodo {
@@ -344,12 +478,25 @@ input UpdateTodoStatus {
   status: TodoStatus!
 }
 
+input NewRoadmap {
+  title: String!
+}
+
+input NewRoadmapNode {
+  roadmapId: ID!
+  parentId: ID
+  title: String!
+}
+
 type Mutation {
   createTodo(input: NewTodo!): Todo!
   deleteTodo(id: ID!): Todo!
   updateTodo(id: ID!, input: UpdateTodo!): Todo!
   updateTodoStatus(id: ID!, input: UpdateTodoStatus!): Todo!
   catchUpDailyLogs: Boolean!
+  createRoadmap(input: NewRoadmap!): Roadmap!
+  createRoadmapNode(input: NewRoadmapNode!): RoadmapNode!
+  deleteRoadmapNode(id: ID!): RoadmapNode!
 }
 `, BuiltIn: false},
 }
@@ -367,6 +514,32 @@ func (ec *executionContext) childFields_DailyLog(ctx context.Context, field grap
 		return ec.fieldContext_DailyLog_isCompleted(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type DailyLog", field.Name)
+}
+
+func (ec *executionContext) childFields_Roadmap(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_Roadmap_id(ctx, field)
+	case "title":
+		return ec.fieldContext_Roadmap_title(ctx, field)
+	case "createdAt":
+		return ec.fieldContext_Roadmap_createdAt(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Roadmap", field.Name)
+}
+
+func (ec *executionContext) childFields_RoadmapNode(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_RoadmapNode_id(ctx, field)
+	case "roadmapId":
+		return ec.fieldContext_RoadmapNode_roadmapId(ctx, field)
+	case "parentId":
+		return ec.fieldContext_RoadmapNode_parentId(ctx, field)
+	case "title":
+		return ec.fieldContext_RoadmapNode_title(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type RoadmapNode", field.Name)
 }
 
 func (ec *executionContext) childFields_Todo(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -509,6 +682,34 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_createRoadmapNode_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (model.NewRoadmapNode, error) {
+			return ec.unmarshalNNewRoadmapNode2pathwayᚑbackendᚋgraphᚋmodelᚐNewRoadmapNode(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createRoadmap_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (model.NewRoadmap, error) {
+			return ec.unmarshalNNewRoadmap2pathwayᚑbackendᚋgraphᚋmodelᚐNewRoadmap(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -520,6 +721,20 @@ func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, 
 		return nil, err
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteRoadmapNode_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -614,6 +829,20 @@ func (ec *executionContext) field_Query_dailyLogs_args(ctx context.Context, rawA
 		return nil, err
 	}
 	args["to"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_roadmapNodes_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "roadmapId",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["roadmapId"] = arg0
 	return args, nil
 }
 
@@ -926,6 +1155,138 @@ func (ec *executionContext) fieldContext_Mutation_catchUpDailyLogs(_ context.Con
 	return graphql.NewScalarFieldContext("Mutation", field, true, true, errors.New("field of type Boolean does not have child fields"))
 }
 
+func (ec *executionContext) _Mutation_createRoadmap(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_createRoadmap(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().CreateRoadmap(ctx, fc.Args["input"].(model.NewRoadmap))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.Roadmap) graphql.Marshaler {
+			return ec.marshalNRoadmap2ᚖpathwayᚑbackendᚋgraphᚋmodelᚐRoadmap(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_createRoadmap(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Roadmap(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createRoadmap_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createRoadmapNode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_createRoadmapNode(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().CreateRoadmapNode(ctx, fc.Args["input"].(model.NewRoadmapNode))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.RoadmapNode) graphql.Marshaler {
+			return ec.marshalNRoadmapNode2ᚖpathwayᚑbackendᚋgraphᚋmodelᚐRoadmapNode(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_createRoadmapNode(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_RoadmapNode(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createRoadmapNode_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteRoadmapNode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_deleteRoadmapNode(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().DeleteRoadmapNode(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.RoadmapNode) graphql.Marshaler {
+			return ec.marshalNRoadmapNode2ᚖpathwayᚑbackendᚋgraphᚋmodelᚐRoadmapNode(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_deleteRoadmapNode(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_RoadmapNode(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteRoadmapNode_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_todos(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -996,6 +1357,82 @@ func (ec *executionContext) fieldContext_Query_dailyLogs(ctx context.Context, fi
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_dailyLogs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_roadmaps(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_roadmaps(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Query().Roadmaps(ctx)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.Roadmap) graphql.Marshaler {
+			return ec.marshalNRoadmap2ᚕᚖpathwayᚑbackendᚋgraphᚋmodelᚐRoadmapᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Query_roadmaps(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Roadmap(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_roadmapNodes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_roadmapNodes(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().RoadmapNodes(ctx, fc.Args["roadmapId"].(string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.RoadmapNode) graphql.Marshaler {
+			return ec.marshalNRoadmapNode2ᚕᚖpathwayᚑbackendᚋgraphᚋmodelᚐRoadmapNodeᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Query_roadmapNodes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_RoadmapNode(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_roadmapNodes_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -1076,6 +1513,167 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 		},
 	}
 	return fc, nil
+}
+
+func (ec *executionContext) _Roadmap_id(ctx context.Context, field graphql.CollectedField, obj *model.Roadmap) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Roadmap_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Roadmap_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Roadmap", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _Roadmap_title(ctx context.Context, field graphql.CollectedField, obj *model.Roadmap) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Roadmap_title(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Title, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Roadmap_title(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Roadmap", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _Roadmap_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Roadmap) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Roadmap_createdAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Roadmap_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Roadmap", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _RoadmapNode_id(ctx context.Context, field graphql.CollectedField, obj *model.RoadmapNode) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RoadmapNode_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RoadmapNode_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RoadmapNode", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _RoadmapNode_roadmapId(ctx context.Context, field graphql.CollectedField, obj *model.RoadmapNode) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RoadmapNode_roadmapId(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.RoadmapID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RoadmapNode_roadmapId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RoadmapNode", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _RoadmapNode_parentId(ctx context.Context, field graphql.CollectedField, obj *model.RoadmapNode) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RoadmapNode_parentId(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ParentID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOID2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_RoadmapNode_parentId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RoadmapNode", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _RoadmapNode_title(ctx context.Context, field graphql.CollectedField, obj *model.RoadmapNode) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RoadmapNode_title(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Title, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RoadmapNode_title(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RoadmapNode", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.CollectedField, obj *model.Todo) (ret graphql.Marshaler) {
@@ -2284,6 +2882,80 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputNewRoadmap(ctx context.Context, obj any) (model.NewRoadmap, error) {
+	var it model.NewRoadmap
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"title"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "title":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Title = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewRoadmapNode(ctx context.Context, obj any) (model.NewRoadmapNode, error) {
+	var it model.NewRoadmapNode
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"roadmapId", "parentId", "title"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "roadmapId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("roadmapId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.RoadmapID = data
+		case "parentId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("parentId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ParentID = data
+		case "title":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Title = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj any) (model.NewTodo, error) {
 	var it model.NewTodo
 	if obj == nil {
@@ -2480,6 +3152,27 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "createRoadmap":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createRoadmap(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createRoadmapNode":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createRoadmapNode(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deleteRoadmapNode":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteRoadmapNode(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2566,6 +3259,50 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "roadmaps":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_roadmaps(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "roadmapNodes":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_roadmapNodes(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -2574,6 +3311,106 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferred), math.MaxInt32)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var roadmapImplementors = []string{"Roadmap"}
+
+func (ec *executionContext) _Roadmap(ctx context.Context, sel ast.SelectionSet, obj *model.Roadmap) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, roadmapImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Roadmap")
+		case "id":
+			out.Values[i] = ec._Roadmap_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "title":
+			out.Values[i] = ec._Roadmap_title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._Roadmap_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferred), math.MaxInt32)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var roadmapNodeImplementors = []string{"RoadmapNode"}
+
+func (ec *executionContext) _RoadmapNode(ctx context.Context, sel ast.SelectionSet, obj *model.RoadmapNode) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, roadmapNodeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RoadmapNode")
+		case "id":
+			out.Values[i] = ec._RoadmapNode_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "roadmapId":
+			out.Values[i] = ec._RoadmapNode_roadmapId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "parentId":
+			out.Values[i] = ec._RoadmapNode_parentId(ctx, field, obj)
+		case "title":
+			out.Values[i] = ec._RoadmapNode_title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3088,9 +3925,79 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
+func (ec *executionContext) unmarshalNNewRoadmap2pathwayᚑbackendᚋgraphᚋmodelᚐNewRoadmap(ctx context.Context, v any) (model.NewRoadmap, error) {
+	res, err := ec.unmarshalInputNewRoadmap(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewRoadmapNode2pathwayᚑbackendᚋgraphᚋmodelᚐNewRoadmapNode(ctx context.Context, v any) (model.NewRoadmapNode, error) {
+	res, err := ec.unmarshalInputNewRoadmapNode(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNNewTodo2pathwayᚑbackendᚋgraphᚋmodelᚐNewTodo(ctx context.Context, v any) (model.NewTodo, error) {
 	res, err := ec.unmarshalInputNewTodo(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNRoadmap2pathwayᚑbackendᚋgraphᚋmodelᚐRoadmap(ctx context.Context, sel ast.SelectionSet, v model.Roadmap) graphql.Marshaler {
+	return ec._Roadmap(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRoadmap2ᚕᚖpathwayᚑbackendᚋgraphᚋmodelᚐRoadmapᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Roadmap) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNRoadmap2ᚖpathwayᚑbackendᚋgraphᚋmodelᚐRoadmap(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNRoadmap2ᚖpathwayᚑbackendᚋgraphᚋmodelᚐRoadmap(ctx context.Context, sel ast.SelectionSet, v *model.Roadmap) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Roadmap(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNRoadmapNode2pathwayᚑbackendᚋgraphᚋmodelᚐRoadmapNode(ctx context.Context, sel ast.SelectionSet, v model.RoadmapNode) graphql.Marshaler {
+	return ec._RoadmapNode(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRoadmapNode2ᚕᚖpathwayᚑbackendᚋgraphᚋmodelᚐRoadmapNodeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.RoadmapNode) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNRoadmapNode2ᚖpathwayᚑbackendᚋgraphᚋmodelᚐRoadmapNode(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNRoadmapNode2ᚖpathwayᚑbackendᚋgraphᚋmodelᚐRoadmapNode(ctx context.Context, sel ast.SelectionSet, v *model.RoadmapNode) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._RoadmapNode(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
@@ -3337,6 +4244,24 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	_ = sel
 	_ = ctx
 	res := graphql.MarshalBoolean(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v any) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalID(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalID(*v)
 	return res
 }
 
