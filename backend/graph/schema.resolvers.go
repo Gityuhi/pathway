@@ -7,6 +7,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 	"pathway-backend/graph/model"
 	"pathway-backend/internal/domain/entity"
 	"pathway-backend/internal/infrastructure/middleware"
@@ -76,6 +77,21 @@ func (r *mutationResolver) CatchUpDailyLogs(ctx context.Context) (bool, error) {
 	return true, nil
 }
 
+// CreateRoadmap is the resolver for the createRoadmap field.
+func (r *mutationResolver) CreateRoadmap(ctx context.Context, input model.NewRoadmap) (*model.Roadmap, error) {
+	panic(fmt.Errorf("not implemented: CreateRoadmap - createRoadmap"))
+}
+
+// CreateRoadmapNode is the resolver for the createRoadmapNode field.
+func (r *mutationResolver) CreateRoadmapNode(ctx context.Context, input model.NewRoadmapNode) (*model.RoadmapNode, error) {
+	panic(fmt.Errorf("not implemented: CreateRoadmapNode - createRoadmapNode"))
+}
+
+// DeleteRoadmapNode is the resolver for the deleteRoadmapNode field.
+func (r *mutationResolver) DeleteRoadmapNode(ctx context.Context, id string) (*model.RoadmapNode, error) {
+	panic(fmt.Errorf("not implemented: DeleteRoadmapNode - deleteRoadmapNode"))
+}
+
 // Todos is the resolver for the todos field.
 func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 	userID, err := middleware.UserIDFromContext(ctx)
@@ -100,6 +116,16 @@ func (r *queryResolver) DailyLogs(ctx context.Context, from string, to string) (
 		return nil, err
 	}
 	return ToModelDailyLogs(logs), nil
+}
+
+// Roadmaps is the resolver for the roadmaps field.
+func (r *queryResolver) Roadmaps(ctx context.Context) ([]*model.Roadmap, error) {
+	panic(fmt.Errorf("not implemented: Roadmaps - roadmaps"))
+}
+
+// RoadmapNodes is the resolver for the roadmapNodes field.
+func (r *queryResolver) RoadmapNodes(ctx context.Context, roadmapID string) ([]*model.RoadmapNode, error) {
+	panic(fmt.Errorf("not implemented: RoadmapNodes - roadmapNodes"))
 }
 
 // Mutation returns MutationResolver implementation.
