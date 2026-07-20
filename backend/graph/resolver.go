@@ -11,7 +11,8 @@ import (
 // here.
 
 type Resolver struct{
-	TodoService *usecase.TodoService
-	LogService  *usecase.LogService
-	Users       repository.UserRepository
+	TodoService    *usecase.TodoService
+	LogService     *usecase.LogService
+	RoadmapService *usecase.RoadmapService
+	Users          repository.UserRepository
 }

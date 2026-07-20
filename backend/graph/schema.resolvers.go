@@ -7,7 +7,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"pathway-backend/graph/model"
 	"pathway-backend/internal/domain/entity"
 	"pathway-backend/internal/infrastructure/middleware"
@@ -79,17 +78,41 @@ func (r *mutationResolver) CatchUpDailyLogs(ctx context.Context) (bool, error) {
 
 // CreateRoadmap is the resolver for the createRoadmap field.
 func (r *mutationResolver) CreateRoadmap(ctx context.Context, input model.NewRoadmap) (*model.Roadmap, error) {
-	panic(fmt.Errorf("not implemented: CreateRoadmap - createRoadmap"))
+	userID, err := middleware.UserIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	roadmap, err := r.RoadmapService.CreateRoadmap(ctx, userID, input.Title)
+	if err != nil {
+		return nil, err
+	}
+	return ToModelRoadmap(roadmap), nil
 }
 
 // CreateRoadmapNode is the resolver for the createRoadmapNode field.
 func (r *mutationResolver) CreateRoadmapNode(ctx context.Context, input model.NewRoadmapNode) (*model.RoadmapNode, error) {
-	panic(fmt.Errorf("not implemented: CreateRoadmapNode - createRoadmapNode"))
+	userID, err := middleware.UserIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	node, err := r.RoadmapService.CreateNode(ctx, userID, input.RoadmapID, input.ParentID, input.Title)
+	if err != nil {
+		return nil, err
+	}
+	return ToModelRoadmapNode(node), nil
 }
 
 // DeleteRoadmapNode is the resolver for the deleteRoadmapNode field.
 func (r *mutationResolver) DeleteRoadmapNode(ctx context.Context, id string) (*model.RoadmapNode, error) {
-	panic(fmt.Errorf("not implemented: DeleteRoadmapNode - deleteRoadmapNode"))
+	userID, err := middleware.UserIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	node, err := r.RoadmapService.DeleteNode(ctx, userID, id)
+	if err != nil {
+		return nil, err
+	}
+	return ToModelRoadmapNode(node), nil
 }
 
 // Todos is the resolver for the todos field.
@@ -120,12 +143,28 @@ func (r *queryResolver) DailyLogs(ctx context.Context, from string, to string) (
 
 // Roadmaps is the resolver for the roadmaps field.
 func (r *queryResolver) Roadmaps(ctx context.Context) ([]*model.Roadmap, error) {
-	panic(fmt.Errorf("not implemented: Roadmaps - roadmaps"))
+	userID, err := middleware.UserIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	roadmaps, err := r.RoadmapService.ListRoadmaps(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return ToModelRoadmaps(roadmaps), nil
 }
 
 // RoadmapNodes is the resolver for the roadmapNodes field.
 func (r *queryResolver) RoadmapNodes(ctx context.Context, roadmapID string) ([]*model.RoadmapNode, error) {
-	panic(fmt.Errorf("not implemented: RoadmapNodes - roadmapNodes"))
+	userID, err := middleware.UserIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	nodes, err := r.RoadmapService.ListNodes(ctx, userID, roadmapID)
+	if err != nil {
+		return nil, err
+	}
+	return ToModelRoadmapNodes(nodes), nil
 }
 
 // Mutation returns MutationResolver implementation.

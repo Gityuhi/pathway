@@ -71,14 +71,16 @@ func main() {
 	logRepo := postgres.NewLogRepository(queries)
 	logService := usecase.NewLogService(logRepo)
 
+	roadmapRepo := postgres.NewRoadmapRepository(pool, queries)
+	roadmapService := usecase.NewRoadmapService(roadmapRepo)
+
 	userRepo := postgres.NewUserRepository(queries)
-	
-	
 
 	resolver := &graph.Resolver{
-		TodoService: todoService,
-		LogService: logService,
-		Users:       userRepo,
+		TodoService:    todoService,
+		LogService:     logService,
+		RoadmapService: roadmapService,
+		Users:          userRepo,
 	}
 
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
