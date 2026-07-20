@@ -1,5 +1,5 @@
 import dagre from "@dagrejs/dagre"
-import type { Edge, Node } from "@xyflow/react"
+import { Position, type Edge, type Node } from "@xyflow/react"
 
 export type RoadmapNodeData = {
   title: string
@@ -50,6 +50,8 @@ export function layoutRoadmapNodes(items: RoadmapNodeItem[]) {
       type: "roadmapNode",
       position: { x, y },
       data: { title: n.title },
+      sourcePosition: Position.Right,
+      targetPosition: Position.Left,
       draggable: false,
       selectable: true,
     }
@@ -63,6 +65,11 @@ export function layoutRoadmapNodes(items: RoadmapNodeItem[]) {
         id: `e-${child.parentId}-${child.id}`,
         source: child.parentId,
         target: child.id,
+        type: "smoothstep",
+        style: {
+          stroke: "#a1a1aa",
+          strokeWidth: 1.5,
+        },
       },
     ]
   })
