@@ -108,6 +108,78 @@ func toEntityDailyLogs(rows []db.GetDailyLogsRow) ([]entity.DailyLog, error) {
 	return logs, nil
 }
 
+func toEntityRoadmap(row db.Roadmap) (entity.Roadmap, error) {
+	id, err := pgUUIDToString(row.ID)
+	if err != nil {
+		return entity.Roadmap{}, err
+	}
+	userID, err := pgUUIDToString(row.UserID)
+	if err != nil {
+		return entity.Roadmap{}, err
+	}
+	if !row.CreatedAt.Valid {
+		return entity.Roadmap{}, fmt.Errorf("invalid created_at")
+	}
+
+	return entity.Roadmap{
+		ID:        id,
+		UserID:    userID,
+		Title:     row.Title,
+		CreatedAt: row.CreatedAt.Time,
+	}, nil
+}
+
+func toEntityRoadmaps(rows []db.Roadmap) ([]entity.Roadmap, error) {
+	roadmaps := make([]entity.Roadmap, 0, len(rows))
+	for _, row := range rows {
+		roadmap, err := toEntityRoadmap(row)
+		if err != nil {
+			return nil, err
+		}
+		roadmaps = append(roadmaps, roadmap)
+	}
+	return roadmaps, nil
+}
+
+func toEntityRoadmapNode(row db.Node) (entity.RoadmapNode, error) {
+	id, err := pgUUIDToString(row.ID)
+	if err != nil {
+		return entity.RoadmapNode{}, err
+	}
+	roadmapID, err := pgUUIDToString(row.RoadmapID)
+	if err != nil {
+		return entity.RoadmapNode{}, err
+	}
+
+	var parentID *string
+	if row.ParentID.Valid {
+		s, err := pgUUIDToString(row.ParentID)
+		if err != nil {
+			return entity.RoadmapNode{}, err
+		}
+		parentID = &s
+	}
+
+	return entity.RoadmapNode{
+		ID:        id,
+		RoadmapID: roadmapID,
+		ParentID:  parentID,
+		Title:     row.Title,
+	}, nil
+}
+
+func toEntityRoadmapNodes(rows []db.Node) ([]entity.RoadmapNode, error) {
+	nodes := make([]entity.RoadmapNode, 0, len(rows))
+	for _, row := range rows {
+		node, err := toEntityRoadmapNode(row)
+		if err != nil {
+			return nil, err
+		}
+		nodes = append(nodes, node)
+	}
+	return nodes, nil
+}
+
 // resolverのエラーハンドリング用
 func mapError(err error) error {
 	if errors.Is(err, pgx.ErrNoRows) {
