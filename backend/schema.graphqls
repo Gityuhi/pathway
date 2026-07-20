@@ -67,6 +67,10 @@ input NewRoadmapNode {
   title: String!
 }
 
+input UpdateRoadmapNode {
+  title: String!
+}
+
 type Mutation {
   createTodo(input: NewTodo!): Todo!
   deleteTodo(id: ID!): Todo!
@@ -75,5 +79,6 @@ type Mutation {
   catchUpDailyLogs: Boolean!
   createRoadmap(input: NewRoadmap!): Roadmap!
   createRoadmapNode(input: NewRoadmapNode!): RoadmapNode!
+  updateRoadmapNode(id: ID!, input: UpdateRoadmapNode!): RoadmapNode!
   deleteRoadmapNode(id: ID!): RoadmapNode!
 }

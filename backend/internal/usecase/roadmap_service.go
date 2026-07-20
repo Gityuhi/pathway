@@ -55,6 +55,10 @@ func (s *RoadmapService) CreateNode(
 	return s.roadmaps.CreateNode(ctx, userID, roadmapID, parentID, title)
 }
 
+func (s *RoadmapService) UpdateNode(ctx context.Context, userID, nodeID, title string) (entity.RoadmapNode, error) {
+	return s.roadmaps.UpdateNode(ctx, userID, nodeID, title)
+}
+
 func (s *RoadmapService) DeleteNode(ctx context.Context, userID, nodeID string) (entity.RoadmapNode, error) {
 	return s.roadmaps.DeleteNode(ctx, userID, nodeID)
 }

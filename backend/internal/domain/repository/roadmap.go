@@ -13,5 +13,6 @@ type RoadmapRepository interface {
 	ListNodesByRoadmap(ctx context.Context, userID, roadmapID string) ([]entity.RoadmapNode, error)
 	GetNodeByIDAndUser(ctx context.Context, userID, nodeID string) (entity.RoadmapNode, error)
 	CreateNode(ctx context.Context, userID, roadmapID string, parentID *string, title string) (entity.RoadmapNode, error)
+	UpdateNode(ctx context.Context, userID, nodeID, title string) (entity.RoadmapNode, error)
 	DeleteNode(ctx context.Context, userID, nodeID string) (entity.RoadmapNode, error)
 }

@@ -35,6 +35,15 @@ join roadmaps r on n.roadmap_id = r.id
 where n.id = $1
   and r.user_id = $2;
 
+-- name: UpdateNode :one
+update nodes n
+set title = $1
+from roadmaps r
+where n.id = $2
+  and n.roadmap_id = r.id
+  and r.user_id = $3
+returning n.*;
+
 -- name: DeleteNode :one
 delete from nodes n
 using roadmaps r
