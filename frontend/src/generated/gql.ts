@@ -16,6 +16,8 @@ import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-
 type Documents = {
     "\n  mutation CatchUpDailyLogs {\n    catchUpDailyLogs\n  }\n": typeof types.CatchUpDailyLogsDocument,
     "\n  query DailyLogs($from: String!, $to: String!) {\n    dailyLogs(from: $from, to: $to) {\n      date\n      isCompleted\n    }\n  }\n": typeof types.DailyLogsDocument,
+    "\n  mutation CreateRoadmap($input: NewRoadmap!) {\n    createRoadmap(input: $input) {\n      id\n      title\n      createdAt\n    }\n  }\n": typeof types.CreateRoadmapDocument,
+    "\n  query Roadmaps {\n    roadmaps {\n      id\n      title\n      createdAt\n    }\n  }\n": typeof types.RoadmapsDocument,
     "\n  mutation CreateTodo($input: NewTodo!) {\n    createTodo(input: $input) {\n      id\n      text\n      status\n      user {\n        id\n        name\n      }\n    }\n  }\n": typeof types.CreateTodoDocument,
     "\n  query Todos {\n    todos {\n      id\n      text\n      status\n      user {\n        id\n        name\n      }\n    }\n  }\n": typeof types.TodosDocument,
     "\n  mutation UpdateTodo($id: ID!, $input: UpdateTodo!) {\n    updateTodo(id: $id, input: $input) {\n      id\n      text\n      status\n    }\n  }\n": typeof types.UpdateTodoDocument,
@@ -25,6 +27,8 @@ type Documents = {
 const documents: Documents = {
     "\n  mutation CatchUpDailyLogs {\n    catchUpDailyLogs\n  }\n": types.CatchUpDailyLogsDocument,
     "\n  query DailyLogs($from: String!, $to: String!) {\n    dailyLogs(from: $from, to: $to) {\n      date\n      isCompleted\n    }\n  }\n": types.DailyLogsDocument,
+    "\n  mutation CreateRoadmap($input: NewRoadmap!) {\n    createRoadmap(input: $input) {\n      id\n      title\n      createdAt\n    }\n  }\n": types.CreateRoadmapDocument,
+    "\n  query Roadmaps {\n    roadmaps {\n      id\n      title\n      createdAt\n    }\n  }\n": types.RoadmapsDocument,
     "\n  mutation CreateTodo($input: NewTodo!) {\n    createTodo(input: $input) {\n      id\n      text\n      status\n      user {\n        id\n        name\n      }\n    }\n  }\n": types.CreateTodoDocument,
     "\n  query Todos {\n    todos {\n      id\n      text\n      status\n      user {\n        id\n        name\n      }\n    }\n  }\n": types.TodosDocument,
     "\n  mutation UpdateTodo($id: ID!, $input: UpdateTodo!) {\n    updateTodo(id: $id, input: $input) {\n      id\n      text\n      status\n    }\n  }\n": types.UpdateTodoDocument,
@@ -54,6 +58,14 @@ export function graphql(source: "\n  mutation CatchUpDailyLogs {\n    catchUpDai
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query DailyLogs($from: String!, $to: String!) {\n    dailyLogs(from: $from, to: $to) {\n      date\n      isCompleted\n    }\n  }\n"): (typeof documents)["\n  query DailyLogs($from: String!, $to: String!) {\n    dailyLogs(from: $from, to: $to) {\n      date\n      isCompleted\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateRoadmap($input: NewRoadmap!) {\n    createRoadmap(input: $input) {\n      id\n      title\n      createdAt\n    }\n  }\n"): (typeof documents)["\n  mutation CreateRoadmap($input: NewRoadmap!) {\n    createRoadmap(input: $input) {\n      id\n      title\n      createdAt\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query Roadmaps {\n    roadmaps {\n      id\n      title\n      createdAt\n    }\n  }\n"): (typeof documents)["\n  query Roadmaps {\n    roadmaps {\n      id\n      title\n      createdAt\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
