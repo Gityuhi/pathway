@@ -3,6 +3,10 @@ import { Position, type Edge, type Node } from "@xyflow/react"
 
 export type RoadmapNodeData = {
   title: string
+  isEditing?: boolean
+  onStartEdit?: () => void
+  onCommitEdit?: (title: string) => void
+  onCancelEdit?: () => void
 }
 
 export type RoadmapNodeItem = {

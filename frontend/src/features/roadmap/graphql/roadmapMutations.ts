@@ -11,6 +11,17 @@ export const CreateRoadmapNodeDocument = graphql(`
   }
 `)
 
+export const UpdateRoadmapNodeDocument = graphql(`
+  mutation UpdateRoadmapNode($id: ID!, $input: UpdateRoadmapNode!) {
+    updateRoadmapNode(id: $id, input: $input) {
+      id
+      roadmapId
+      parentId
+      title
+    }
+  }
+`)
+
 export const DeleteRoadmapNodeDocument = graphql(`
   mutation DeleteRoadmapNode($id: ID!) {
     deleteRoadmapNode(id: $id) {

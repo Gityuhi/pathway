@@ -54,6 +54,10 @@ type Todo struct {
 	User   *User      `json:"user"`
 }
 
+type UpdateRoadmapNode struct {
+	Title string `json:"title"`
+}
+
 type UpdateTodo struct {
 	Text string `json:"text"`
 }

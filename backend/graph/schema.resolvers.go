@@ -102,6 +102,19 @@ func (r *mutationResolver) CreateRoadmapNode(ctx context.Context, input model.Ne
 	return ToModelRoadmapNode(node), nil
 }
 
+// UpdateRoadmapNode is the resolver for the updateRoadmapNode field.
+func (r *mutationResolver) UpdateRoadmapNode(ctx context.Context, id string, input model.UpdateRoadmapNode) (*model.RoadmapNode, error) {
+	userID, err := middleware.UserIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	node, err := r.RoadmapService.UpdateNode(ctx, userID, id, input.Title)
+	if err != nil {
+		return nil, err
+	}
+	return ToModelRoadmapNode(node), nil
+}
+
 // DeleteRoadmapNode is the resolver for the deleteRoadmapNode field.
 func (r *mutationResolver) DeleteRoadmapNode(ctx context.Context, id string) (*model.RoadmapNode, error) {
 	userID, err := middleware.UserIDFromContext(ctx)

@@ -48,6 +48,7 @@ type ComplexityRoot struct {
 		CreateTodo        func(childComplexity int, input model.NewTodo) int
 		DeleteRoadmapNode func(childComplexity int, id string) int
 		DeleteTodo        func(childComplexity int, id string) int
+		UpdateRoadmapNode func(childComplexity int, id string, input model.UpdateRoadmapNode) int
 		UpdateTodo        func(childComplexity int, id string, input model.UpdateTodo) int
 		UpdateTodoStatus  func(childComplexity int, id string, input model.UpdateTodoStatus) int
 	}
@@ -93,6 +94,7 @@ type MutationResolver interface {
 	CatchUpDailyLogs(ctx context.Context) (bool, error)
 	CreateRoadmap(ctx context.Context, input model.NewRoadmap) (*model.Roadmap, error)
 	CreateRoadmapNode(ctx context.Context, input model.NewRoadmapNode) (*model.RoadmapNode, error)
+	UpdateRoadmapNode(ctx context.Context, id string, input model.UpdateRoadmapNode) (*model.RoadmapNode, error)
 	DeleteRoadmapNode(ctx context.Context, id string) (*model.RoadmapNode, error)
 }
 type QueryResolver interface {
@@ -190,6 +192,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.DeleteTodo(childComplexity, args["id"].(string)), true
+	case "Mutation.updateRoadmapNode":
+		if e.ComplexityRoot.Mutation.UpdateRoadmapNode == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateRoadmapNode_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.UpdateRoadmapNode(childComplexity, args["id"].(string), args["input"].(model.UpdateRoadmapNode)), true
 	case "Mutation.updateTodo":
 		if e.ComplexityRoot.Mutation.UpdateTodo == nil {
 			break
@@ -342,6 +355,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputNewRoadmap,
 		ec.unmarshalInputNewRoadmapNode,
 		ec.unmarshalInputNewTodo,
+		ec.unmarshalInputUpdateRoadmapNode,
 		ec.unmarshalInputUpdateTodo,
 		ec.unmarshalInputUpdateTodoStatus,
 	)
@@ -488,6 +502,10 @@ input NewRoadmapNode {
   title: String!
 }
 
+input UpdateRoadmapNode {
+  title: String!
+}
+
 type Mutation {
   createTodo(input: NewTodo!): Todo!
   deleteTodo(id: ID!): Todo!
@@ -496,6 +514,7 @@ type Mutation {
   catchUpDailyLogs: Boolean!
   createRoadmap(input: NewRoadmap!): Roadmap!
   createRoadmapNode(input: NewRoadmapNode!): RoadmapNode!
+  updateRoadmapNode(id: ID!, input: UpdateRoadmapNode!): RoadmapNode!
   deleteRoadmapNode(id: ID!): RoadmapNode!
 }
 `, BuiltIn: false},
@@ -749,6 +768,28 @@ func (ec *executionContext) field_Mutation_deleteTodo_args(ctx context.Context, 
 		return nil, err
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateRoadmapNode_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (model.UpdateRoadmapNode, error) {
+			return ec.unmarshalNUpdateRoadmapNode2pathwayᚑbackendᚋgraphᚋmodelᚐUpdateRoadmapNode(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg1
 	return args, nil
 }
 
@@ -1237,6 +1278,50 @@ func (ec *executionContext) fieldContext_Mutation_createRoadmapNode(ctx context.
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_createRoadmapNode_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateRoadmapNode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_updateRoadmapNode(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().UpdateRoadmapNode(ctx, fc.Args["id"].(string), fc.Args["input"].(model.UpdateRoadmapNode))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.RoadmapNode) graphql.Marshaler {
+			return ec.marshalNRoadmapNode2ᚖpathwayᚑbackendᚋgraphᚋmodelᚐRoadmapNode(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_updateRoadmapNode(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_RoadmapNode(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateRoadmapNode_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -2986,6 +3071,36 @@ func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj any) 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateRoadmapNode(ctx context.Context, obj any) (model.UpdateRoadmapNode, error) {
+	var it model.UpdateRoadmapNode
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"title"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "title":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Title = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj any) (model.UpdateTodo, error) {
 	var it model.UpdateTodo
 	if obj == nil {
@@ -3162,6 +3277,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "createRoadmapNode":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createRoadmapNode(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updateRoadmapNode":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateRoadmapNode(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -4054,6 +4176,11 @@ func (ec *executionContext) unmarshalNTodoStatus2pathwayᚑbackendᚋgraphᚋmod
 
 func (ec *executionContext) marshalNTodoStatus2pathwayᚑbackendᚋgraphᚋmodelᚐTodoStatus(ctx context.Context, sel ast.SelectionSet, v model.TodoStatus) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) unmarshalNUpdateRoadmapNode2pathwayᚑbackendᚋgraphᚋmodelᚐUpdateRoadmapNode(ctx context.Context, v any) (model.UpdateRoadmapNode, error) {
+	res, err := ec.unmarshalInputUpdateRoadmapNode(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNUpdateTodo2pathwayᚑbackendᚋgraphᚋmodelᚐUpdateTodo(ctx context.Context, v any) (model.UpdateTodo, error) {

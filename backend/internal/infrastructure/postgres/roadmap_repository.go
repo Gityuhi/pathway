@@ -168,6 +168,26 @@ func (r *roadmapRepository) CreateNode(
 	return toEntityRoadmapNode(row)
 }
 
+func (r *roadmapRepository) UpdateNode(ctx context.Context, userID, nodeID, title string) (entity.RoadmapNode, error) {
+	pgUserID, err := stringToPgUUID(userID)
+	if err != nil {
+		return entity.RoadmapNode{}, err
+	}
+	pgNodeID, err := stringToPgUUID(nodeID)
+	if err != nil {
+		return entity.RoadmapNode{}, err
+	}
+	row, err := r.queries.UpdateNode(ctx, db.UpdateNodeParams{
+		Title:  title,
+		ID:     pgNodeID,
+		UserID: pgUserID,
+	})
+	if err != nil {
+		return entity.RoadmapNode{}, mapError(err)
+	}
+	return toEntityRoadmapNode(row)
+}
+
 func (r *roadmapRepository) DeleteNode(ctx context.Context, userID, nodeID string) (entity.RoadmapNode, error) {
 	pgUserID, err := stringToPgUUID(userID)
 	if err != nil {

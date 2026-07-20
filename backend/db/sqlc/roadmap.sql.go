@@ -210,3 +210,32 @@ func (q *Queries) ListRoadmaps(ctx context.Context, userID pgtype.UUID) ([]Roadm
 	}
 	return items, nil
 }
+
+const updateNode = `-- name: UpdateNode :one
+update nodes n
+set title = $1
+from roadmaps r
+where n.id = $2
+  and n.roadmap_id = r.id
+  and r.user_id = $3
+returning n.id, n.roadmap_id, n.parent_id, n.title, n.created_at
+`
+
+type UpdateNodeParams struct {
+	Title  string
+	ID     pgtype.UUID
+	UserID pgtype.UUID
+}
+
+func (q *Queries) UpdateNode(ctx context.Context, arg UpdateNodeParams) (Node, error) {
+	row := q.db.QueryRow(ctx, updateNode, arg.Title, arg.ID, arg.UserID)
+	var i Node
+	err := row.Scan(
+		&i.ID,
+		&i.RoadmapID,
+		&i.ParentID,
+		&i.Title,
+		&i.CreatedAt,
+	)
+	return i, err
+}
