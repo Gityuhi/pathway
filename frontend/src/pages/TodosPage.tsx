@@ -1,3 +1,4 @@
+import { useCallback, type ComponentType } from "react"
 import { useNavigate, useOutletContext, useLocation } from "react-router"
 import type { Session } from "@supabase/supabase-js"
 import { SideBar, type NavKey } from "@/components/SideBar"
@@ -18,16 +19,28 @@ const navRoutes: Record<NavKey, string> = {
   roadmap: "/roadmap",
 }
 
-function navKeyFromPathname(pathname: string): NavKey {
-  if (pathname === "/log") return "log"
-  if (pathname === "/roadmap") return "roadmap"
-  return "todos"
-}
-
 const navTitles: Record<NavKey, string> = {
   todos: "Todos",
   log: "Log",
   roadmap: "Roadmap",
+}
+
+const navApps: Record<NavKey, ComponentType> = {
+  todos: TodoApp,
+  log: LogApp,
+  roadmap: RoadmapApp,
+}
+
+const navContentClass: Record<NavKey, string> = {
+  todos: "p-6",
+  log: "flex justify-center p-6",
+  roadmap: "p-6",
+}
+
+function navKeyFromPathname(pathname: string): NavKey {
+  if (pathname === "/log") return "log"
+  if (pathname === "/roadmap") return "roadmap"
+  return "todos"
 }
 
 export function TodosPage() {
@@ -35,18 +48,17 @@ export function TodosPage() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const active = navKeyFromPathname(pathname)
+  const ActiveApp = navApps[active]
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     await supabase.auth.signOut()
     await apolloClient.clearStore()
     navigate("/login")
-  }
+  }, [navigate])
 
-  const handleSelect = (key: NavKey) => {
+  const handleSelect = useCallback((key: NavKey) => {
     navigate(navRoutes[key])
-  }
-
-  const title = navTitles[active]
+  }, [navigate])
 
   return (
     <SidebarProvider>
@@ -59,22 +71,10 @@ export function TodosPage() {
       <SidebarInset>
         <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger />
-          <h1 className="text-lg font-semibold">{title}</h1>
+          <h1 className="text-lg font-semibold">{navTitles[active]}</h1>
         </header>
-        <div
-          className={
-            active === "log"
-              ? "flex justify-center p-6"
-              : "p-6"
-          }
-        >
-          {active === "log" ? (
-            <LogApp />
-          ) : active === "roadmap" ? (
-            <RoadmapApp />
-          ) : (
-            <TodoApp />
-          )}
+        <div className={navContentClass[active]}>
+          <ActiveApp />
         </div>
       </SidebarInset>
     </SidebarProvider>
