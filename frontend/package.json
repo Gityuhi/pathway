@@ -12,9 +12,11 @@
   },
   "dependencies": {
     "@apollo/client": "^4.2.5",
+    "@dagrejs/dagre": "^3.0.0",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@supabase/supabase-js": "^2.108.2",
     "@tailwindcss/vite": "^4.3.1",
+    "@xyflow/react": "^12.11.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",

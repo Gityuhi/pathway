@@ -42,6 +42,14 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: "/roadmap",
+        element: (
+          <ProtectedRoute>
+            <TodosPage />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 ])

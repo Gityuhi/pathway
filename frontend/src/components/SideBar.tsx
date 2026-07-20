@@ -1,5 +1,5 @@
 import type { ComponentProps } from "react"
-import { CalendarDays, ListTodo, LogOut } from "lucide-react"
+import { CalendarDays, GitBranch, ListTodo, LogOut } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -14,11 +14,12 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 
-export type NavKey = "todos" | "log"
+export type NavKey = "todos" | "log" | "roadmap"
 
 const navItems: { key: NavKey; label: string; icon: typeof ListTodo }[] = [
   { key: "todos", label: "Todos", icon: ListTodo },
   { key: "log", label: "Log", icon: CalendarDays },
+  { key: "roadmap", label: "Roadmap", icon: GitBranch },
 ]
 
 type SideBarProps = Omit<ComponentProps<typeof Sidebar>, "onSelect"> & {
