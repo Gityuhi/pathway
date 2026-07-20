@@ -63,7 +63,7 @@ input NewRoadmap {
 
 input NewRoadmapNode {
   roadmapId: ID!
-  parentId: ID!
+  parentId: ID
   title: String!
 }
 

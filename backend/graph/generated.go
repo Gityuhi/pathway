@@ -484,7 +484,7 @@ input NewRoadmap {
 
 input NewRoadmapNode {
   roadmapId: ID!
-  parentId: ID!
+  parentId: ID
   title: String!
 }
 
@@ -2939,7 +2939,7 @@ func (ec *executionContext) unmarshalInputNewRoadmapNode(ctx context.Context, ob
 			it.RoadmapID = data
 		case "parentId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("parentId"))
-			data, err := ec.unmarshalNID2string(ctx, v)
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}

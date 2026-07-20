@@ -22,9 +22,9 @@ type NewRoadmap struct {
 }
 
 type NewRoadmapNode struct {
-	RoadmapID string `json:"roadmapId"`
-	ParentID  string `json:"parentId"`
-	Title     string `json:"title"`
+	RoadmapID string  `json:"roadmapId"`
+	ParentID  *string `json:"parentId,omitempty"`
+	Title     string  `json:"title"`
 }
 
 type NewTodo struct {
